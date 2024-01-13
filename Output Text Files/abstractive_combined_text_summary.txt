@@ -1,0 +1,1 @@
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. The attention mechanism has been applied to a range ofnatural language processing (NLP) tasks. It calculates the context representationof a sentence as a weighted sum of individual components.

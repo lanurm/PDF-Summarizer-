@@ -1,0 +1,15 @@
+Results on various benchmark data sets show that our proposed method brings strong performance gains in all different set- tings, yielding more intuitively reasonable attention distribu-tion.
+of Wide Band-Gap Semicon, Xi- dian University, Xi’an, Shaanxi, 710126 China e-mail:ytyang@xidian.edu.cnconnected RSU, which also makes the two support high physical mobility faced with huge challenges.
+We also provide detailed security analysis and perform experiments using real data set in a simulated SAGIVN environment, which expounds the ERDSS’s potential of practical usage.
+[14] C. Wang, N. Cao, J. Li, K. Ren, and W. Lou, “Secure ranked keyword search over encrypted cloud data,” in 2010 International Conference on Distributed Computing Systems, ICDCS 2010, Genova, Italy, June 21-25, 2010, 2010.
+We found that sentiment analysis classiﬁers do not perform well on game review data, with AUC values ranging from 0.53 (Stanford CoreNLP), which is slightly better than random guessing, up to 0.70 (NLTK).
+As we can observe, the plot plateaus when it reaches 100K (presenting an AUC of 0.67), which means using 100K reviews is sufﬁcient for our purpose.
+[15] L. Dong, F. Wei, M. Zhou, and K. Xu, “Adaptive multi- compositionality for recursive neural models with appli- cations to sentiment analysis,” in Twenty-Eighth AAAI Conference on Artiﬁcial Intelligence, 2014.
+[19] M. Goul, O. Marjanovic, S. Baxley, and K. Vizecky, “Managing the enterprise business intelligence app store: Sentiment analysis supported requirements engineering,” in2012 45th Hawaii Int’l Conference on System Sci- ences.
+[52] J. J. Thompson, B. H. Leung, M. R. Blair, and M. Taboada, “Sentiment analysis of player chat messag- ing in the video game StarCraft 2: Extending a lexicon- based model,” Knowledge-Based Systems, vol.
+This dataset comprises maintenance records from a variety of oil rig equipment, each having several sub-units with associated maintainable items, and ultimately the speciﬁc parts that underwent repair or replacement.
+1, it can be seen that phrases like ‘wash out’ or ‘worn’ are used interchangeably by industry personnel when referring to excessive wear of ﬂuid end components.
+However, their model incorporates the taxonomic guidance for only those words which are contextual and co-occur with each other in a given maintenance log.
+For example, the clusters of documents in Setting 1 would represent records from different failure mechanisms, this in- formation can help OEMs to better stratify their event data before performing reliability studies.
+[1] J. Wan, S. Tang, D. Li, S. Wang, C. Liu, H. Abbas, and A. V . Vasilakos, “A manufacturing big data solution for active preventive maintenance,” IEEE Transactions on Industrial Informatics, vol.
+[4] J. P. Usuga Cadavid, B. Grabot, S. Lamouri, R. Pellerin, and A. Fortin, “Valuing free-form text data from maintenance logs through transfer learning with camembert,” Enterprise Information Systems, pp.

@@ -1,0 +1,1320 @@
+Abstract — Attention has been shown highly effective for model-
+ing sequences, capturing the more informative parts in learning
+such as machine translation and sentiment classiﬁcation.
+study, we consider using deep reinforcement learning to automat-ically optimize attention distribution during the minimization ofend task training losses.
+With more sufﬁcient environment states,iterative actions are taken to adjust attention weights so that moreinformative words receive more attention automatically.
+Resultson different tasks and different attention networks demonstratethat our model is of great effectiveness in improving the end taskperformances, yielding more reasonable attention distribution.The more in-depth analysis further reveals that our retroﬁttingmethod can help to bring explainability for baseline attention.
+Index Terms— Attention mechanism, deep reinforcement learn-
+ing (RL), natural language processing (NLP), neural networks.
+THE attention mechanism has been applied to a range of
+natural language processing (NLP) tasks, such as neural
+some extent, as humans often pay more attention to importantparts to form a whole picture of sentences.
+In addition, self-attention (SA) gives strong results on a wide
+range of NLP tasks, in spite of its simplicity [10]–[12].Hierarchical attention shows its power when dealing with
+documental level textual modeling [13].
+tasks in NLP, attention weights can fail to capture the mostinformative part of the content and do not always satisfy
+of ﬁne-grained sentiment analysis.
+the vanilla attention mechanism does not generate proper
+In fact, a large proportion of thewords with higher attention weights is not important or task-
+related, such as stop words, which are the examples visualized
+30% highlighted words by neural attention is not coincident
+This negatively affects the ﬁnal predic-tion of the model.
+attention distribution is effectively ﬁne-tuned and optimized.
+Some methods use direct supervision to modify attention
+values [17], [18], but it can be highly costly and not feasibleto obtain ideal attention signals for all tasks.
+models, the weights obtained can be regarded as unsupervised
+1The examples are sampled from SemEval2014/2015 data sets.
+See https://www.ieee.org/publications/rights/index.html for more information.
+In this article, we investigate the effectiveness of deep RLfor obtaining better attention weights, by designing a novel
+attention weights given a baseline attention network.
+In particular, as shown in Fig. 2, given a baseline network,
+actions are dynamically taken to either increase or decreasethe attention score of each node.
+to guide the learning of the policy network.
+text representations calculated from revised attention weights,the attention network can be optimized by backpropagation via
+a policy gradient-based learning algorithm.
+end task loss at the global scope helps the model to revise
+the baseline attention weights.
+The baseline attention network
+We compare RL-adjusted attention weights with the original
+attention weights on four types of attention mechanisms,including general attention [21], SA [10], hierarchical atten-
+tion [13], and attention-based encoder–decoder [2].
+on various benchmark data sets show that our proposed
+method brings strong performance gains in all different set-
+tings, yielding more intuitively reasonable attention distribu-tion.
+of the attention mechanism largely depends on the exact
+attention architectures and the end tasks.
+Attention showed its early potentials in NLP on neural
+Attention mechanisms havesubsequently been applied to various NLP tasks, including dia-log generation [3], machine reading/comprehension [4], [22],
+sentiment analysis [23], [24], text summarization [6], machine
+pose an attention network incorporating both word- andclause-level attentions for asp ect-based sentiment classiﬁca-
+tion CNN network for text classiﬁcation.
+resulting in boosted task performances [11], [12].
+For example, Niculae and Blondel [17]use a smoothed max-operator as the replacement of softmax
+integrate both soft and hard attention into one context fusionmodel, “reinforced SA,” for natural language inference and
+module sufﬁciently and directly access the end task loss underboth the global and the local scope, and calculate revised atten-
+of attention representation of transformer has been much
+studied (e.g., the syntax-aware feature induction [28]–[30]).In this article, we show that the transformer attention can also
+network can help to yield better task performances while
+use RL to ﬁne-tune a bilingual machine translation model.Yuet al.
+Some work employs RL to enhance machine learning meth-
+line hard-attention mechanisms for improving NMT on long
+of continuous attention weights, we use the probabilistic policygradient algorithm [45] with action sampling from a Gaussian
+at each time step to dynamically revise weights, by modelingweight-assigning as a sequential decision process, which can
+the framework as deep RL guided attention (named DRGA).It consists of three components: an attention network, a policy
+computes initial attention scores for an input sequence.
+weights will be used for the attention network to calculate
+attention context representation for making prediction of a
+learning of the policy for adjusting attention weights.
+of using a deep Q-network, which learns a greedy policy for
+consists of the word vector wt∈RDwof the current element,
+Rn∗Dh, and the query representation u∈RDu. The word vector
+hidden representation htof the current element provide basic
+query representation u, offers the global context information.
+Formally, the state for the policy network is deﬁned as follows:
+the actions for the input sequence are decided, the adjustingmodule increases or decreases the corresponding attentionscore based on the action values.
+Speciﬁcally, given an original attention vector α=
+3) Reward: Once the attention network makes a prediction
+based on the revised attention representation, the posterior
+policy network to compute reward RLfor leading to task-
+attention network’s prediction, we perform action sampling
+To encourage the agent to make proper adjustments, we addan additional term to regulate the number of highly weightedelements.
+/triangleinv/Theta1J(/Theta1)=/summationdisplay
+In our work, the policy gradient provides timely direct
+weights (a probability distribution) for a sequence of elements
+attention based representation.
+The task-speciﬁed network takes an input sequence X=
+1,..., xn}and obtains word embeddings wi(1<i<n).T h e
+A task-related vector representation of a query
+to the attention module to obtain a weighted representation c
+(also hs) and attention weights α, via the following equations:
+2The tokens are ﬁrst sorted by their attention values within the sequence
+An accumulated threshold δis set based on the speciﬁc data
+set, and those tokens beneath the threshold are taken as highlighted ones.In some cases, models involve multihead [11], multi-
+is the number of layers or heads and Nis the attention
+The attention network calculates the context representation
+c/primeusing the revised attention weights α/primeand hidden represen-
+can be output based on the context representation
+attention network
+attention network
+attention network
+attention network
+In our framework, the attention network can be equipped
+with different types of attention implementation.
+and the attention network separately.
+pretrain the attention network until it is close to convergence.
+Then, we pretrain the policy network while keeping theparameters of the other model ﬁxed.
+tecture, including SA [10], task-speciﬁc attention [21], hier-
+Experiments are performed on three tasks, includ-
+ing ﬁne-grained sentiment analysis, text classiﬁcation, and
+The performances of classiﬁcation tasks are comparedand reported in accuracy.
+method ten times on all the corresponding test sets, and all theresults are presented after Signiﬁcance Test with p ≤0.015.
+train/dev/test subset) on each benchmarks data sets strictly
+1) Pretrain the attention network via Eq.
+2) Fix the parameters of the attention network and pretrainthe agent via Eq.
+2: Feed the Xinto attention network;
+3: Compute attention weights αforsiby attention network
+9: Calculate the new attention context representation forattention network via Eq.
+10: Make prediction in attention network, and minimize the
+12: Update the parameters for both attention network and RL
+the dimension of both hidden states of the agent and word
+The word vectors are initialized with Glove
+pretrained embeddings.4We use Adam [49] with a learning
+Dropout is used for the attention network with
+different coefﬁcient factors for different tasks and data sets
+after ﬁne-tuning the corresponding development sets.
+We validate DRGA with ﬁve types of networks,including LSTM [50], CNN [51], CICNN [52], DiSAN [10],
+our model with a differentiated attention learning model by
+data sets for text classiﬁcation, including Movie Review
+2) Task-Speciﬁc Attention: We test DRGA on general
+attention-based networks, in which the query uof the atten-
+We choose three attention-based
+networks for ﬁne-grained sentiment analysis, including LSTM
+5We only use the transformer encoder for classiﬁcation tasks.TABLE I
+RESULTS WITH DIFFERENT SETTINGS OF RL A GENT ON LSTM +SA
+based on the data sets of SemEval2014 Task 4 (3-class) andSemEval2015 Task 12 (2-class), respectively.
+of DRGA on hierarchical attention, we choose two types ofnetworks as baselines.
+benchmark data sets on document level text classiﬁcation,including IMDB (10-class) and Yelp Data Set Challenge
+We compare the performance ofdifferent models, including UPA [48] and HUAPA [13].
+4) Attention-Based Encoder–Decoder: To evaluate the com-
+which are English to German translation data sets.
+use a typical attention-based seq2seq (Att-seq2seq) model pro-posed by Luong et al.
+development data set, based on the LSTM +SA with DRGA.
+We compare the performances of DRGA under different com-
+number of highly weighted tokens.
+INTEGRATING THE ATTENTION -BASED NEURAL NETWORK WITH
+We introduce L0to guide the learning of salient words
+development data set.
+L0=0.2a n dδ =0.85 on the SUBJ data set, DRGA
+RESULTS OF TASK-SPECIFIC ATTENTION WITHDRGA
+RESULTS OF HIERARCHICAL ATTENTION WITHDRGA
+on different data sets for different tasks.
+explore the performances of different numbers of parameters
+shown in Table I, we can see that more parameters or morehidden layers do not always improve the performance.
+Overall, we see that a simple light-weighted MLPnetwork can bring good improvements for baseline attention.
+the task of text classiﬁcation on data sets with SA, both LSTM
+and CNN achieve competitive results, as shown in Table II.By integrating DRGA, the pe rformances of almost all the
+SA baselines are improved on each data set.
+which use two-branch architecture to shift the attention to
+Table III shows the results for ﬁne-grained sentiment
+speciﬁed attention networks.
+the task in three baselines for four data sets.
+As shown in Table IV, DRGA improves the UPA model
+on the majority of data sets.
+attention-based seq2seq with DRGA.
+DRGA gives the samelevel of improvement for sequence generation models, helping
+We present qualitative analysis on how DRGA optimizes
+α. The weights from the original attention are compared with
+attention distribution revised by DRGA is more reasonable
+compared with the original attention model.
+the original attention weight is generally functional, DRGAguides the attention module to give higher attention valuesto more task-related tokens, which consequently improves the
+Attention weights of stop words, which are less
+informative for the task, are effectively weakened by DRGA.The optimization effect is more evident for long sentences due
+nal attention module are properly revised by DRGA thanksto its ability to sufﬁciently interacting with the sentence
+we track down the transition of attention weights, as shown
+ble and continuous, and some important words for the taskreceive increasingly more prope r attention when the iteration
+The above visualization shows the effectiveness ofthe proposed model.
+token numbers from the attention module and the highlighted
+DRGA on four data sets.
+The results are shown in Table VIII.We ﬁnd that, for each data set, DRGA decreases the count oforiginally highlighted words, with a maximum reduction rate
+penalize or increase, we investigate the top-25 words whoseweights are modiﬁed the most by DRGA.
+expressed as follows: if the learned attention weights agree
+tive of counterfactual attention distribution will correspond-
+ingly change the model output distribution most [34]–[36].
+6The attention weights of the transformer are multidimensional, and we
+VISUALIZATION OF ATTENTION WEIGHTS FOR BASELINE ATTENTION MODELS BEFORE AND AFTER THE OPTIMIZA TION FROM OURFRAMEWORK
+TRANSITION OF ATTENTION WEIGHTS BY TANSFORMER +DRGA B ASED ON THE EXAMPLE SENTENCE FOR CLASSIFICATION TASK
+removing the learned most important token iin attention, and
+Based on several different attention architectures and
+data sets, we plot /Delta1JS against /Delta1α=αi−αr.Fig. 4.
+is around 0.2 in the attention improved by DRAG, whichmeans that the retroﬁtted attention network can help to cor-rectly adjust the most intuitive token i.
+attention in different data sets can yield distinct capabilityof explainability, which can be found in Fig. 5(a) and (b),
+SUBJ data sets.
+can lead to negative /Delta1JS [e.g., in Fig. 5(a)], indicating task-
+unrelated attention weights.
+Finally, our DRAG framework ismore useful in optimizing sequence-to-sequence attention in
+: OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+: OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+: OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+: OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+: OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+JS divergence gap ( /Delta1JS) ( Y-axis) between attention distribution against /Delta1α of attention weight ( X-axis) between the most important token iand
+The results at the topper row in blue color are from the raw atten tion model, and the results at the corresponding bottom row in green
+We retroﬁtted the attention mechanism for sequence model-
+ing in NLP, investigating a principled solution of deep RL foroptimizing attention by adding a policy network on top of a
+baseline attention network for adjusting the attention weights
+method gives more interpretable attention distribution overfour types of attention networks, yielding better task perfor-
+Future work includes how to improve the training
+The authors would like to thank the anonymous reviewers
+attention-based neural machine translation,” 2015, arXiv:1508.04025 .
+based LSTM for sentiment classiﬁcation,” in Proc.
+attentions for co-extraction of aspect and opinion terms,” in Proc.
+“Disan: Directional self-attention network fo r RNN/CNN-free language
+representations with user attentio n and product attention for sentiment
+lem in multi-head attention-based neural machine translation,” 2018,arXiv:1809.03985 .
+Ney, “Biasing attention-based recurrent neural
+networks using external alignment information,” in Proc.
+attention maps for text classiﬁca tion: Do humans and neural networks
+and structured neural attention,” in Proc.
+learning for sentence classiﬁcation,” in Proc.
+for text classiﬁcation via reinforcement learning,” in Proc.
+Wang, “Interactive attention networks for
+aspect-level sentiment classiﬁcation,” 2017, arXiv:1709.00893 .
+GRU-gated attention model,” IEEE Trans.
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+Ji, “Dispatched attention with multi-task
+, “Aspect sentiment classiﬁcation with both word-level
+and clause-level attention networks,” in Proc.
+structures into self-attention,” in Proc.
+language model for end tasks,” 2020, arXiv:2009.07408 .
+Wang, “Token-level dynamic self-attention network
+self-training using neural reinforcement learning,” in P roc.
+translation model with hard attention,” in Proc.
+learning with continuous action in practice,” in Proc.
+classiﬁcation with user and product attention,” in Proc.
+information by self-attention mechan ism in convolutional neural net-
+sentiment categorization with respect to rating scales,” in Proc.
+works for text classiﬁcation,” in Proc.
+works for text classiﬁcation,” in Proc.
+aspect-level sentiment classiﬁcation,” in Proc.
+He has been working on natural language process-
+ing and deep learning, especially focusing onlanguage structure parsing, sentiment analysis, andinformation extraction.
+Yue Zhang (Member, IEEE) r eceived the B.E. degree in computer science from Tsinghua Uni-versity, Beijing, China, in 2003, and the M.S. and Ph.D. degrees from Oxford University, Oxford,U.K., in 2006 and 2009, respectively.
+ural language processing, text mining, and machinelearning.
+working on natural language processing over the past
+ten years, and has published 20 related papers injournals and conferences, including AAAI, EMNLP,
+His interests include natural language processing,machine learning, and data mining.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Authorized licensed use limited to: Central Michigan University.
+Encrypted Data Retrieval and Sharing Scheme
+to grow, the original ground-based IoV system is difﬁcult to meet the ever-increasing demand.
+Integrated Network (SAGIN) incorporates satellite systems, aerial network and terrestrial communications.
+integrates multiple network services and communication modes, which makes SAGIN more vulnerable to various types of attacks and
+This paper ﬁrst presents the dominating security threats in data storage, transmission and sharing of space-air-ground
+effective encrypted data retrieval and sharing scheme in SAGIVN(ERDSS) for possible threats, the ERDSS can execute fuzzy retrieval
+over misspelling keywords and sort results by relevance scores to realize precise retrieval.
+discussion and execute experiments based on real-world data sets.
+Index Terms—IoV, SAGIN, Natural Language Process, Searchable Encryption, Data Privacy.
+For example, the privacy and security of data
+vice Networks, Xidian University, Xi’an, Shaanxi, 710126 China e-mail:
+Networks, Xidian University, Xi’an, Shaanxi, 710126 China e-mail: zl-
+Networks, Xidian University, Xi’an, Shaanxi, 710126 China e-mail: zl-
+Hui Li is with the State Key Laboratory of Integrated Service Networks, Xidian
+dian University, Xi’an, Shaanxi, 710126 China e-mail:ytyang@xidian.edu.cnconnected RSU, which also makes the two support high
+these reasons, data sharing and transmission in network-
+ing IoV architectures are ground-based to supply network
+to the ground network to construct a ground-based, multi-
+dimensional and different level integrated network architec-
+provides a wider range of real-time network access.
+efﬁcient, low-cost and stable network access services when
+need to fully consider various network attacks and security
+to perform location query or navigation services,
+head, we present a data privacy-preserving scheme with
+fuzzy ranked and multi-keyword search based on Paillier
+of keyword transformation based on the uni-gram
+precision, we introduced natural language process in
+calculate the keyword weight in query keyword set,
+formulation in Section 3 includes system model architecture,
+Section 5 gives the security analysis
+based networks also being continuously promoted.
+It proposed to combine space-air-ground networks
+space-air communication networks, and assessment of the
+application of ground-based communication technologies
+multi-keyword search over encrypted data.
+Ranked search is presented to order the retrieved results
+keyword SE scheme based on keywords splitting algorithm
+retrieval scheme over encrypted data that supports multi-
+keyword search and dynamic update, in which KBB-tree is
+Natural language process (NLP) is an interdisciplinary sub-
+secure novel data sharing scheme with anti-crosstalk in the
+data captured by vehicle sensors and utilize an improved
+a privacy protection scheme based on physical layer se-
+existing SE scheme is used, cross-language search cannot
+ERDSS ﬁrst utilizes the Uni-gram algorithm to split the
+algorithm and the the processes of diverse languages are as
+position of the letters in the word, ﬁnally add inte-
+contains the relationship between words, and this relation-
+ical analysis methods in natural language process.
+the words in the input sentence, and the other intermediate
+the optimized one adds the weight of the keyword position
+wi2W((nwi=Lfi)Pk
+model and the security deﬁnition.
+As presented in ﬁgure.3, system model consists of four
+The data privacy of vehicles will be in-
+When SV initiates data query or communication req-
+transfers trapdoors combined with weight sets to the
+network access point (NAP).
+networks, while HAP and satellite clusters provide
+queries results from corresponding sub-databases
+SVs’ encryption data and ﬁle bi-directional hash table
+keyword uni-directional hash table to the NAP .
+port cross-language retrieval over encrypted data.
+duce any useful information during operations.
+security goals of the ERDSS are deﬁned as follows:
+uments, indexes, languages information, ﬁle IDs and
+any useful information from the uploaded tuples and
+DC and NAP cannot learn any useful information
+standards of the SAGIVN model for communication
+tion and deletion of data in DC and the updating of
+identiﬁers of the corresponding documents, search pattern,
+NAP and DC from learning anything about the search
+scheme does not reveal any information to the NAP and DC
+ing the security index, the cloud server cannot infer information
+and whether different ﬁles contain the same keyword.
+given a search trapdoor NAP cannot learn any information about
+searched keywords and their relevant document identiﬁers should
+Given the keyword set 
+Setup: Challenger Ccreates a keyword set !.Cselects some
+. Firstly, Challenger Cruns setup algorithm to generate key,
+thenindexgen algorithm generates encrypted matrix index ~Ifor
+A. Finally,Ctransfers keyword set !and security index ~Ito
+algorithm on security index, thereby acquiring the result PR.
+and keys for each entity, and completing the data process-
+When SV queries or shares data, it needs to execute
+NAP sets the fuzzy value of
+for each ﬁle and transfers W, plaintext data set to
+makes use of public parameter pp, a random number
+AP uses the SV’s paillier key pkcto encrypt the
+word (Latin Language) or one single character(Stroke
+text tuple and ﬁle identiﬁer to generate an encrypted
+number of keyword set, nis the maximum
+number of data set), setting all elements in
+and keywords based on initializing matrix .
+AP only transfers the encrypted index to NAP , the hash
+culate the weights for all keywords in query keyword set
+For each keyword in query set,
+For each keyword in query set,
+query set for example, the phrase structure tree and
+14:Receive result from NAP .
+TTS , NAP ﬁrst executes fuzzy search, puts the items match-
+ingTTS into the candidate set TTS0, then NAP makes use
+ofTTS0for accurate search to get the ﬁnal result set TTS00.
+Input: Trapdoor tuple set TTS , Keyword number n, En-
+Output: Candidate keyword set TTS0
+text data and obtain the plaintext set of the query result.
+TTS0, Candidate keyword number t, Fuzzy value acc,
+Output: The ﬁnal result set TTS00
+word update and data update.
+Data Update The data update of the ERDSS is differ-
+data update needs to be operated on NAP and DC
+The data addition operation
+sourced data, AP applies AES-encryption on these
+the ERDSS makes use of hash function to create
+NAP learns the query trapdoors but not
+The security of the ERDSS depends on the semantic secu-
+rity of the paillier homomorphic encryption algorithm.
+the paillier homomorphic encryption algorithm based on
+prediction model(ROM) encryption algorithm.
+The speciﬁc process of the security experiment is de-
+distinguishing the semantic security encryption algorithm
+the deﬁnition of the semantic security encryption system, &
+We compare the ERDSS with two other similar data pre-
+section, we evaluate the performance of these schemes.
+The number of edge server in system0.9511.051.11.151.21.251.31.351.4The computational time(ms)ERDSS
+the service provided for the SV is over-saturated, the data
+tion, and plotted related data statistical graphs.
+used in the simulation is a dataset for a large movie review
+called ”Learning Word Vectors for Sentiment Analysis”.
+the size of data set changed from 500 to 3000 with the
+early with the number of ﬁles in data set.
+From the experimental data, ERDSS could
+For the size of query set changed
+data set to 500 and 3000, respectively.
+of keywords in the query of the ERDSS changes from
+the impact of data set and query set size on search
+Figure.11(a) changes the size of data set on
+affected by the size of data set.
+number of keywords in query.
+set, which primarily owe to the search mechanism in
+search accuracy data of them as two line charts in
+ERDSS Fig. 11: Trapdoor Generation
+The number of documents in database2.52.522.542.562.582.62.622.642.662.682.7Time Consumption(ms)104 SEARCH
+The number of keywords in query set3456789101112Time Consumption(ms)104 SEARCH
+Fig. 12: (a) For the size of data set varies from 500 to 3000 with the immobilized size of dictionary and query set to 500 and
+(b) For the size of query set varies from 5 to 25 with the immobilized size of data set and dictionary to 1000
+the number of keywords in query increases from 1
+search stage to process the query set.
+that supports fuzzy query of multiple keywords and secure
+calculate weights for query keywords, and execute secure
+result queries based on encrypted data index efﬁciently.
+So as to ensure the security of the data sharing, the
+provide detailed security analysis and perform experiments
+using real data set in a simulated SAGIVN environment,
+[27] proposed a new network
+integrated vehicular networks: Challenges and solutions,” IEEE
+integrated mobile edge networks: A survey,” IEEE Access, vol.
+2015 European Conference on Networks and Communications, 2015.
+for searches on encrypted data,” in IEEE Symposium on Security &
+search over encrypted data in cloud computing,” in INFOCOM,
+multi-keyword fuzzy search over encrypted data in the cloud,”
+multi-keyword fuzzy search over encrypted outsourced data with
+accuracy improvement,” IEEE Transactions on Information Forensics
+keyword search over encrypted cloud data,” in 2010 International
+multi-keyword ranked search over encrypted data in hybrid
+multi-keyword ranked search scheme over encrypted cloud data,”
+IEEE Transactions on Parallel and Distributed Systems, vol.
+data sharing scheme in internet of vehicles,” Future Generation
+keyword fuzzy search on cloud encrypted data supporting range
+Digital Communications and Networks, vol.
+computing security, Searchable Encryption and
+Kai Fan received his B.S., M.S. and Ph.D. degrees from Xidian University, P .
+research interests include network and informa-
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+What Causes Wrong Sentiment Classiﬁcations of
+have been targeted by sentiment analysis research, such as
+techniques have been proposed, the performance of current
+sentiment analysis techniques is still far from acceptable, mainly
+this paper, we study how sentiment analysis performs on game
+study on the performance of widely-used sentiment classiﬁers
+show that most classiﬁers do not perform well on game reviews,
+reviews that point out advantages and disadvantages of the game,
+not trivial to be resolved and we call upon sentiment analysis
+agenda that investigates how the performance of sentiment
+analysis of game reviews can be improved, for instance by
+game-related issues of reviews (e.g., reviews with advantages
+Finally, we show that training sentiment
+classiﬁers on reviews that are stratiﬁed by the game genre is
+Index Terms—Natural language processing, Sentiment analy-
+Sentiment analysis is a widely adopted Natural Language
+Processing (NLP) technique to obtain the sentiment (expres-
+sion of positive or negative feeling) from text data [29, 39].
+This technique consists of identifying the sentiment that
+is present in a piece of text (words, sentences, or entire
+Sentiment analysis is a research topic that has
+gained attention and has presented improvements [15, 49, 56],
+tomer reviews of mobile applications [19, 40], video game
+GAmes And Repository Data (ASGAARD) Lab, University of Alberta,
+Sentiment analysis is valuable
+players feel about the game and learn about previous games’
+developers improve their game development processes and
+Several studies have been published on sentiment analysis
+mainly when off-the-shelf sentiment analysis classiﬁers are
+Normally, sentiment analysis techniques must
+[52] adapted a sentiment analysis technique that was
+initially designed for movie reviews to be used in video game
+Despite the low performance of sentiment
+analysis, no study has investigated the reason(s) for the low
+In this study, we investigate how different sentiment classi-
+ﬁers perform on game review data.
+Game reviews from Steam
+differ from other types of data to which sentiment analysis is
+Game reviews contain a more complex text
+structure and generally discuss several aspects of the game,
+in scope since they are not necessarily reviewing a game.
+Prior work [31] also showed that game reviews are different
+from mobile app reviews in several aspects.
+game reviews contain game-speciﬁc terminology, which is a
+Although the diversity of game reviews makes them a rich
+source of data, it also poses challenges to NLP techniques,
+such as sentiment analysis.
+aspects may have different sentiments, which could confuse
+the sentiment classiﬁer when making a classiﬁcation of the
+overall sentiment of the review.
+By applying sentiment classiﬁers on game reviews, we are
+able to report the sentiment classiﬁcation performance and
+identify cases where sentiment analysis fails.
+the following review is an example of a difﬁcult classiﬁcation
+task for current sentiment classiﬁers: “Very nice programmed
+The reviewer makes references to a positive word
+(the reviewer is pointing out that the game contains bugs).
+allows us to ﬁnd problematic text patterns for sentiment
+classiﬁers and provide insights for game developers about how
+to improve the performance of sentiment analysis.
+empirical study on the performance of sentiment analysis on
+12 million game reviews.
+how existing sentiment classiﬁers perform on game reviews,
+aim to propose a new sentiment classiﬁcation technique.
+tationally accessible sentiment classiﬁers [24, 29]: Stanford
+selected classiﬁers adopt different approaches to classify the
+text, such as rule and machine learning-based approaches,
+We evaluated these classiﬁers on all the game reviews
+selected the reviews of which all classiﬁers misclassiﬁed the
+cally signiﬁcant sample of 382 of these reviews to understand
+each identiﬁed factor on the performance of sentiment analysis
+RQ1: How do sentiment analysis classiﬁers perform on
+Investigating the performance of sentiment analysis on game
+reviews is the ﬁrst step to understand how current sentiment
+analysis classiﬁers work on game reviews and whether
+sentiment analysis classiﬁers do not perform well on game
+review data, with AUC values ranging from 0.53 (Stanford
+Identifying the causes for wrong classiﬁcations contributes
+which mislead the classiﬁers, such as reviews that make
+a negative sentiment, and reviews with sarcasm.RQ3: To what extent do the identiﬁed root causes impact
+the performance of sentiment analysis?
+formance of sentiment analysis is important to support game
+reviews which point out advantages and disadvantages of the
+game have the highest negative impact on the performance of
+sentiment analysis, followed by reviews with game compar-
+that training sentiment classiﬁers on reviews stratiﬁed by the
+We evaluate the performance of widely-adopted sentiment
+analysis classiﬁers on game reviews from the Steam
+We identify a set of root causes that can explain the wrong
+classiﬁcations of sentiment analysis classiﬁers on game
+classiﬁcations on game reviews and provide a research
+We provide access to the data1(URLs of game reviews
+from Steam with the sentiment classiﬁcation provided by
+tion II provides a background on sentiment analysis classi-
+Section IV presents the proposed research methodology.
+recommendations on how to perform sentiment analysis on
+ment analysis techniques along with the most used classiﬁers
+to refer to the method adopted for the sentiment classiﬁcation
+and free-to-use sentiment analysis classiﬁers.
+Sentiment analysis techniques are responsible for identify-
+ing the sentiment present in a piece of text, which can be
+an overview of the main sentiment analysis techniques and
+classiﬁers which have been proposed in prior studies.
+is not an exhaustive list of sentiment classiﬁers and it com-
+done based on the method the classiﬁer uses.
+1https://github.com/asgaardlab/sentiment-analysis-Steam reviews
+shows the type of data on which the classiﬁer was originally
+classiﬁer(s) we chose to use in our study.
+based classiﬁers leverage machine learning algorithms, such as
+Support Vector Machines, Na ¨ıve Bayes, and Neural Networks.
+Examples of classiﬁers that adopt this technique are NLTK [7],
+other functions.2Regarding sentiment analysis, NLTK uses a
+bag of words model.
+two different approaches: train a Na ¨ıve Bayes classiﬁer on
+our data and apply the built model (as we did) or use the
+model, which was trained on social media texts, such as
+In the former approach, we train a Na ¨ıve Bayes model to
+classify each review (it provides the probability of being
+Figure 1a presents examples of reviews classiﬁed
+able to capture the negative sentiment of the sentence “I am
+Natural Language Processing Group3at Stanford University.
+The authors propose a model called Recursive Neural Tensor
+Network, of which the implementation is based on a Recurrent
+text to be classiﬁed into a set of sentences and performing a
+positive sentiments, respectively.
+To classify a game review
+If the resulting score is above zero, the review sentiment is
+positive; if it is below zero, the review sentiment is negative;
+otherwise, the review sentiment is neutral.
+only inspecting the sentiment of each word individually and
+Stanford CoreNLP sentiment analysis website with the
+on a predeﬁned list of words along with their sentiment score.
+The piece of text is split into words, and the scores of each
+amples of rule-based classiﬁers are SentiStrength [51],
+sentiment classiﬁers across different domains, such as social
+SentiStrength is a rule-based classiﬁer to classify
+sentences into sentiments based on a word bank in which
+each word has a sentiment score associated with it (this is
+model trained on the MySpace social media network [29].
+document under analysis must be tokenized into sentences,
+proach of getting the sentiment score of each word individually
+classiﬁer is not able to capture the negative sentiment in the
+sentiment analysis on game data and on other types of data.
+We also discuss empirical studies on game reviews.
+in our work, we do not aim at proposing a new sentiment
+of existing sentiment classiﬁer on game reviews and reveal
+sentiment classiﬁers, which are not computationally expensive
+(e.g., deep learning-based classiﬁers).
+Sentiment Analysis on Game Data and Reviews.
+[52] studied how to extend a lexicon-based sentiment
+4http://nlp.stanford.edu:8080/sentiment/rntnDemo.html [Accessed online:
+TABLE I: Sentiment analysis techniques, corresponding classiﬁers and default training dataset.
+Technique Classiﬁer Default training dataset Used by
+Stanford CoreNLP [49] Movie reviews [27], [28], [42], [33], [55]
+*Note that we use the machine learning version of NLTK instead of its V ADER version (which uses a rule-based
+True sentiment NLTK classification Sentence
+Positive PositiveWas blown away by some of the developments in the story in this game, 
+True sentiment SentiStrength classification Sentence Positive strength Negative strength
+Negative Positive I am so happy the game keeps freezing 2 -1
+Negative Positive I am so happy the game keeps freezing 2 -1
+Fig. 1: Examples of sentiment classiﬁcations.
+Fig. 2: Example of the Recursive Neural Tensor Network
+predicting the sentiment in a sentence.
+word dictionary and tailored it to the gaming context.
+approach was able to classify sentiment and identify toxicity
+The authors also performed a niche analysis, which showed
+that the model performances remained relatively stable across
+based sentiment analysis on all user reviews from two game
+The paper showed that the rating of a user review highlycorrelates with the sentiment of the aspect in question, in
+the case of a large enough data set.
+397,759 game reviews to identify the sentiment of 723 adjec-
+that some words which are generally used with a negative (or
+[43], Wijayanto and Khodra [53], and Yauris and Khodra [57]
+analyzed the sentiment about speciﬁc aspects of the game
+the following sentence: “An okay game overall, good story
+An aspect-based sentiment analysis would
+compute a different sentiment score for each mentioned aspect.
+lexicon-based and aspect-based) to perform sentiment analysis
+on different types of data.
+sentiment analysis techniques on game reviews, identify the
+causes in the performance of the classiﬁers.
+Sentiment Analysis on Other Types of Data.
+a tree kernel based model) to perform two classiﬁcation tasks
+using Twitter data: a binary task to classify tweets into positive
+that both models outperform the state-of-the-art approach by
+models presented a gain of 4% in performance in comparison
+data to build sentiment analysis models.
+semantic features into the three different training datasets: a
+general Stanford Twitter Sentiment (STS) dataset, a dataset on
+sentiment and topic at the same time from a piece of text.
+The authors evaluated the model on a movie review dataset
+The results showed that the proposed approach obtained an
+approach to analyze mobile app reviews.
+NLTK classiﬁer to identify ﬁne-grained app features in the user
+psychometrically-based linguistic analysis tool called Linguis-
+In addition, authors of up voted posts present less negative
+The aforementioned works used data from three different
+the other hand, we focus on game reviews from a digital
+Studies on Game Reviews.
+and characterized game reviews from different websites.
+Their ﬁndings show that game reviews are rich
+players might post descriptions of the game under review,
+the review, and suggestions for game improvements.
+and Tomuro [60] performed a study on a large body of user-
+provided game reviews aiming at comparing the characteristics
+of the reviews across two different cultures.
+The authorscollected reviews from Famitsu and Game World (Japanese
+mentioned above studied the characteristics of game reviews
+Differently, on our work, we use game reviews for the
+purpose of evaluating existing sentiment classiﬁers and come
+sentiment analysis models and explored the characteristics
+of game reviews with regard to several different aspects.
+of existing sentiment classiﬁers on game reviews, which game
+review text characteristics impact the performance of senti-
+reviews from Steam to evaluate existing sentiment classiﬁers
+our study to evaluate existing sentiment classiﬁers on game
+reviews from Steam and identify the root causes for wrong
+NLTK Train model
+x reviewsBuilt modelCollecting Game Reviews
+We collected the reviews of all 8,025 games that were
+We collected the reviews of all 8,025 games that were
+reviews from our initial dataset to reduce a possible bias in
+our results due to a small number of reviews (e.g., because a
+In total, we collected reviews of 6,224 games.
+We extracted all the reviews for each game from the Steam
+Community and ended up with a total of 12,338,364 reviews
+for the language of reviews for a game.
+language of each review.
+reviewer recommended the game or not), early access status
+Note that our data consists of Steam game reviews, which is
+different from Metacritic reviews.
+gregates game reviews from professionals and amateurs.
+Metacritic amateur reviews contain gameplay and experience
+properly assess whether the sentiment classiﬁers adopted in
+our work can be applied to professional Metacritic reviews.
+B. Evaluating Sentiment Analysis Performance
+B. Evaluating Sentiment Analysis Performance
+We evaluated the performance of three sentiment anal-
+ysis classiﬁers on game reviews, namely Stanford
+of evaluation of the classiﬁers, we consider the game rec-
+our data, that is, we make the assumption that a review that
+recommends a game has a positive sentiment, while a review
+that does not recommend a game has a negative sentiment.
+dataset contains 10,603,348 positive reviews (recommendation
+= 1) and 1,735,016 negative reviews (recommendation = 0).
+proposing a new sentiment analysis technique that outperforms
+techniques have serious defects for text data [56].
+data using the Na ¨ıve Bayes algorithm.
+tionally expensive to train and test it on our entire data, we
+adopt the out-of-sample bootstrap technique [16] to perform
+the training and testing, since the use of this technique allows
+us to avoid possible bias in the training and testing sets as we
+5https://www.metacritic.com/sampling 100K reviews (sample) with no replacement from
+the entire set of reviews (population) to train the classiﬁer.
+of remaining reviews to test the classiﬁer.
+a possible bias in the training and testing sets.
+all executions of NLTK, before performing the classiﬁcation
+tokenization, case normalization, and stop word removal.
+the classiﬁers (1,000 AUC values corresponding to the 1,000
+between positive and negative sentiments and ranges from 0.5
+consider it as a wrong classiﬁcation since our data has only
+two labels: positive (the reviewer recommends the game) and
+negative (the reviewer does not recommend the game).
+analysis on the reviews that were wrongly classiﬁed by each
+of the three sentiment analysis classiﬁers we use.
+the review text itself that might confuse the classiﬁer rather
+technique [14] to manually analyze the reviews.
+interval of 5%, which corresponds to 382 reviews.
+was then classiﬁed into the set of agreed upon causes by one
+author so we could obtain the percentage of reviews for each
+causes for wrongly classiﬁed reviews, we conducted a series
+separately, on the performance of the sentiment analysis clas-
+For each cause, we selected the set of reviews that
+remaining reviews (the unaffected set), computed the AUC
+distribution for both sets, and compared the AUC distributions
+We need to ﬁnd the best sample size to train the NLTK clas-
+the performance of NLTK with different sample sizes to train
+Training NLTK on our entire dataset would be computation-
+the proper training and testing set sample sizes so we can
+for the sample size (number of reviews): 1K, 10K, 100K, and
+Figure 4b presents how the performance of the NLTK
+which means using 100K reviews is sufﬁcient for our purpose.
+game reviews to train and test the NLTK classiﬁer.
+These results provide evidence of the richness of game
+review data as we do not need the entire dataset to train our
+Fig. 4: Plots of experiments to determine the sample size for
+model, indicating that, although the sentiment classiﬁcation is
+does not need huge amounts of data to learn from.
+RQ1: H OW DO SENTIMENT ANALYSIS CLASSIFIERS
+PERFORM ON GAME REVIEWS ?
+widely-used sentiment analysis classiﬁers on game reviews as
+this is the ﬁrst step to understand whether current sentiment
+analysis classiﬁers are suitable for classifying the sentiment of
+length of the reviews affects the performance of the sentiment
+reviews from each length range.
+with the sentiment classiﬁcation of other three corpora (Stack
+Overﬂow posts, Jira issues, and mobile app reviews), as
+sentiment analysis (in the studied conﬁguration) on game
+reviews while Stanford CoreNLP presented the worst
+Classiﬁer Acc. Precision Recall F-measure AUC
+Review length (number of characters)AUCClassifier
+Fig. 6: Performance of classiﬁers for different length ranges.
+Note that there is a data point for every range of 20 characters
+corresponding data point for that range is present in the plot).
+Figure 6 shows that the performance of the classiﬁers
+remains mostly stable across different review lengths, withTABLE III: F-measure of sentiment classiﬁcation across dif-
+the largest changes occurring for reviews with less than 20
+characters (AUC of 0.65 for NLTK) and reviews with more
+see that NLTK’s performance slightly reduces as the review
+different review lengths in our dataset.
+of the reviews are in the range 20-1000 characters (where
+NLTK performs best), while 20% of the reviews have less than
+sentiment classiﬁcation across different corpora.
+game reviews.
+game reviews.
+game reviews.
+game reviews.
+game reviews.
+game reviews.
+game reviews.
+game reviews.
+As we can see, the classiﬁers usually perform
+better when using a corpus other than game reviews.
+training NLTK on game reviews, it achieves a performance
+Overall, sentiment analysis classiﬁers do not achieve a
+high performance, performing worse on game reviews
+Motivation: Understanding what is causing sentiment analysis
+important insights about how to improve existing sentiment
+Approach: We start by (1) selecting the reviews that were
+representative sample of 382 reviews for the manual analysis.
+root causes which could affect sentiment analysis classiﬁers’
+of 100 reviews (50% wrongly classiﬁed as positive and 50%
+wrongly classiﬁed as negative) to identify the root causes
+TABLE IV: Root causes for misclassiﬁcations in sentiment analysis (each review may be assigned to more than one root
+Contrast conjunctionsThe review points out both the advantages and disadvantages of the game,
+Game comparisonThe review contains a comparison with another game or with a previous version
+Negative terminologyThe review contains words such as killandevilwhich are not necessarily bad
+Sarcasm The review contains sarcastic text 6
+recommendation with a negative (positive) review content6
+X is related to a review Y).
+The sample of 382 reviews for the manual analysis was
+obtained from the reviews that were misclassiﬁed by all three
+all classiﬁers to better identify characteristics of the review text
+that affect the sentiment analysis classiﬁcation, rather than a
+sentiment misclassiﬁcations: use of contrast conjunctions
+mon cause is contrast conjunctions (30%), followed by game
+corresponding examples of reviews.
+Description: The review points out advantages and disadvan-
+Symptoms: This type of review frequently makes use of
+even if ) when presenting positive and negative points about the
+As we can see in the example below, the review contains
+a positive view (“I love this game...”) and a negative view (“...it
+help!”.Root cause 2: Game comparison
+Description: The review compares the game with another
+isons might make the sentiment classiﬁcation more difﬁcult
+since positive or negative points might refer to the other game
+game version under review.
+Symptoms: The review mentions one or more games [A, B...]
+in a review for another game [G], or mentions a version 1.x of
+In the example below, the review for the Terraria game
+compares the reviewed version of the game with a previous
+Description: The review uses (supposedly) negative terminol-
+mislead the classiﬁer towards a negative sentiment classiﬁca-
+tion even though many times the review text has a positive
+sentiment (as indicated by the recommendation of the game).
+Symptoms: The review contains words that are considered
+have a negative connotation for games of speciﬁc genres, such
+The review in the example be-
+low contains supposedly negative words, such as kill, although
+fact, the reviewer recommended the game and even made it
+in the example below was classiﬁed as positive while it should
+Description: The review contains sarcastic text.
+Symptoms: The review contains sarcasm, which is observed
+when the reviewer writes an (apparently) positive text intend-
+in the example below contains sarcastic text as the reviewer
+makes use of positive words (e.g., great ), when the person
+actually points out a negative aspect about the game.
+Description: It means the reviewer might have entered a
+wrong recommendation, which does not match with the review
+casm (as we cannot clearly identify a positive review intending
+Symptoms: The reviewer is positive about the game, but they
+below presents a review that was classiﬁed as positive (as
+expected since the text clearly expresses a positive sentiment).
+However, the reviewer did not recommend the game, which
+Example: “I love this GAME!”.
+We identiﬁed four root causes for wrong classiﬁcations of
+sentiment analysis classiﬁers: use of contrast conjunctions
+(30%), game comparisons (25%), negative terminology
+CAUSES IMPACT THE PERFORMANCE OF SENTIMENT
+identiﬁed root cause to the overall performance of sentiment
+analysis on game reviews.
+analysis on game reviews.
+of better sentiment analysis tools to be deployed in gaming
+identify reviews affected by each root cause.
+identify reviews: contrast conjunctions, game comparison,
+After identifying such reviews,
+we re-ran the NLTK classiﬁer on both groups: the set of
+classiﬁer as it presented the best performance (Section VI) and
+it can be trained on our data.
+the obtained results for each root cause.
+out the advantages and disadvantages of a game usually use
+analysis and performed a keyword-based search in our dataset
+to identify reviews that contain one or more conjunctions of the
+and 2,150,438 reviews in the detected set (identiﬁed by the
+Findings: Game reviews with contrast conjunctions are
+AUC that is 11% lower than for reviews without contrast
+for the sets of reviews without and with contrast conjunctions.
+As we can observe, the AUC of reviews without contrast
+of reviews with the presence of contrast conjunctions.
+games from Steam and, based on this list, we performed a
+keyword-based search in our dataset to identify reviews that
+the game reviews were collected in 2016, their age does not
+We performed a keyword-based search on the reviews in
+0 0.62 0.66 0.7Fig. 8: AUC distribution for reviews
+0 0.62 0.66 0.7Fig. 8: AUC distribution for reviews
+AdventureCasualRacingRPGSportsStrategy0 0.68 0.7 0.72 0.76Fig. 9: AUC distribution for reviews of
+searched and the review text were lower case during the
+Among the most mentioned games in the reviews,
+reviews in the remaining set (95% of the original dataset) and
+reviews in the remaining set (95% of the original dataset) and
+585,153 reviews in the detected set (identiﬁed by the heuristic).
+Findings: Game reviews with comparisons are actually
+that is 8% lower than for reviews without comparisons.
+After training NLTK on both sets, we computed the AUC using
+for the sets of reviews without and with comparison.
+As we can see, reviews without comparison present a higher
+AUC than reviews with comparison.
+case of reviews with contrast conjunctions, comparisons can
+also degrade the performance of sentiment analysis.
+Detection heuristic: We noticed that some game reviews use
+words with a negative connotation, such as kill, evil, and
+Although such words might refer to negative aspects of
+Although the review uses (supposedly)negative words, its ﬁnal content might be positive towards the
+using negative words).
+process for the sentiment analysis classiﬁer based on the game
+crawler to collect the game genre from Steam for each review
+in our dataset and grouped reviews by genre so we could
+the game genres for a randomized version of our data, which
+resulted in genres for 4 million reviews.
+sample 100K reviews for the training and testing sets (casual,
+we had 10K reviews for a speciﬁc genre, we would use 8K for
+Findings: Per-genre training is effective when performing
+TABLE VI: Game genres and corresponding number of re-
+Genre Number of reviews
+Genre Number of reviews
+the AUC distribution for the baseline with a large effect size.
+Reviews that use contrast conjunctions to point out ad-
+negative impact on the performance (11% lower AUC),
+followed by reviews with game comparisons (8% lower
+effective for sentiment analysis on game reviews as it is
+FOR SENTIMENT ANALYSIS ON GAME REVIEWS
+FOR SENTIMENT ANALYSIS ON GAME REVIEWS
+FOR SENTIMENT ANALYSIS ON GAME REVIEWS
+performing sentiment analysis on game review data.
+showed that 100K reviews is a sufﬁcient sample size to train
+and test sentiment analysis classiﬁers on game reviews.
+showed that using more than 100K reviews does not improve
+the sentiment analysis performance as it plateaus after 100K
+Note that this is based on a Na ¨ıve Bayes classiﬁer
+deep learning algorithms.
+is based on the NLTK conﬁgurations adopted in the study
+reviews with advantages and disadvantages of the game.
+Based on the impact that each root cause has on the sentiment
+analysis performance, we suggest game developers and re-
+searchers to develop techniques that can analyze reviews which
+disadvantages of the game under review as this might confuse
+can deal with reviews which make comparison to games other
+than the game under review or to previous versions of the
+Different game genres
+approach helps to avoid mixing different types of data when
+training the model.
+For instance, negative words (e.g., evil) are
+used for different purposes in reviews of different genres, such
+as casual (where the reviewer probably uses it with a negative
+In this paper, we perform a large-scale study to understand
+how sentiment analysis works on game reviews.
+performance of existing sentiment analysis classiﬁers on game
+reviews, identify which factors might impact such performance
+Our study shows that sentiment analysis classiﬁers do
+not perform well on game reviews and we identiﬁed root
+causes for such performance, such as sarcasm and reviews
+Reviews that point out advantages
+and disadvantages of a game (through the use of contrast
+conjunctions) have a high negative impact on the performance
+(reducing the median AUC by 11%), followed by reviews
+review (reducing the median AUC by 8%).
+show that training classiﬁers on reviews stratiﬁed by the genre
+is effective and can improve the performance of sentiment
+what are the root causes for wrong classiﬁcations in sentiment
+analysis on game reviews and the impact of each cause.
+study calls upon sentiment analysis and game researchers to
+further investigate how the performance of sentiment analysis
+on game reviews can be improved, for instance by devel-
+conjunctions and reviews with game comparisons).
+performance of the sentiment classiﬁcation of game reviews.
+performance of the sentiment classiﬁcation of game reviews.
+Passonneau, “Sentiment analysis of Twitter data,” in
+analysis methods,” in Proc.
+sarcasm sentiment recognition in Twitter data,” in Proc.
+How to make use of sarcasm to enhance sentiment anal-
+in Social Networks Analysis and Mining, pp.
+in Social Networks Analysis and Mining, pp.
+on learning from imbalanced data sets,” ACM SIGKDD
+review analytics of free games listed on Google play,” in
+cations to sentiment analysis,” in Twenty-Eighth AAAI
+Sentiment analysis supported requirements engineering,”
+A ﬁne grained sentiment analysis of app reviews,”
+verse opinions from app reviews,” in 2015 ACM/IEEE
+evaluating learning algorithms,” IEEE Transactions on
+knowledge and Data Engineering, vol.
+sentiment analysis in software engineering,” in 2017
+speciﬁc sentiment analysis tools,” in 2018 IEEE 25th
+Int’l Conference on Software Analysis, Evolution and
+for improved sentiment analysis in software engineering
+your weapons: On sentiment analysis tools for software
+engineering research,” in 2015 IEEE Int’l Conference on
+“On negative results when using sentiment analysis tools
+He, “Joint sentiment/topic model for
+sentiment analysis,” in Proceedings of the 18th ACM
+conference on Information and knowledge management,
+empirical study of game reviews on the Steam platform,”
+natural language processing toolkit,” in Proc.
+of Twitter data: Case study on digital India,” in 2016
+Int’l Conference on Information Technology.
+lexicon and learning based approaches for concept-level
+sentiment analysis,” in Proc.
+IEEE/ACM 15th Int’l Conference on Mining Software
+IEEE/ACM 15th Int’l Conference on Mining Software
+Classifying user reviews for software maintenance and
+emotion: Sentiment analysis of security discussions on
+clustering for game review texts,” in Int’l Conference on
+analysis of Twitter,” in Int’l semantic web conference.Springer, 2012, pp.
+amateur reviews of video games on Metacritic,” Proc.
+ment analysis of movie reviews: A new feature-based
+heuristic for aspect-level sentiment classiﬁcation,” in
+reviews for sentiment analysis: A method for researching
+based model,” Knowledge-Based Systems, vol.
+according to aspect-based sentiment analysis using dou-
+analysis framework,” in 2016 IEEE International Con-
+ference on Big Data Analysis (ICBDA), pp.
+of sentiment classiﬁcation on imbalanced datasets with
+transfer learning,” IEEE Access, vol.
+rization for game review using double propagation,” in
+understanding game reviews,” in Proc.
+ral language processing in game studies research: An
+Tomuro, “Cultural differences in game
+appreciation: A study of player game reviews.” in FDG,
+A Custom Word Embedding Model for Clustering
+language based approach and propose a novel custom word
+embedding model which utilizes two sources of information 1)
+dustrial taxonomy, to effectively identify clusters.
+of our model include (a) combined use of semantic and taxonomic
+sources of information for clustering, (b) one step/simultaneous
+our model for cluster identiﬁcation using a real-world dataset.
+Index Terms—Clustering, Natural Language Processing, Main-
+they perform maintenance actions on industrial equipment.
+These maintenance records contain rich information (related
+sis [1], root-cause analysis [2], [3] and maintenance decision-
+these maintenance records can help in improving equipment
+maintenance records, it is impractical to manually review and
+1, 2, 3, 4: Department of Industrial & Systems Engineering, University of
+wear or failure, maintenance actions performed, components
+Fig. 1 shows sample maintenance records for
+mudpump equipment and includes information speciﬁc to the
+they cannot be recorded as structured data.
+The aim of this research is to create models to analyze main-
+records that are similar (e.g., in terms of the failure mechanism
+textual data by combining contextual information as well as
+to perform analysis of maintenance activities, failure types, and
+we can extract structured information from unstructured data
+and then conduct quantitative modeling [8] and analysis of
+processing the natural language maintenance record.
+based on the analysis of the textual information in the mainte-
+different types of maintenance information that are kept by
+meaning of certain words within the maintenance context can
+be different from that in general use as discussed in [10].
+For example, the word ‘stick’ within the maintenance context
+thus requiring us to consider the context in which the word
+Input Data
+Fig. 1: Sample of input data for text analysis.
+As a result, our model needs to
+propose a graphical semi-supervised industry-speciﬁc word
+the natural language processing (NLP) domain [12].
+word into a one dimensional vector space (also called embed-
+dings) and then use this representation to perform downstream
+on a single set of data, i.e., the representation generated using
+word2vec only learns the semantic information presented by
+the contextual words in the document.
+relations between words, wherein, in the ﬁrst step they learn
+pairs of words by optimizing different cost functions.
+develop a dynamic weighting neural network and use the
+(a lexical database of semantic relations between words) along
+with contextual words present in a document.
+proposed by [14], also uses co-occurring words and their
+minimizes the distance between embeddings of the words
+The Attract-Repel model proposed
+by [18] uses a pre-speciﬁed word representation/embedding
+The model proposed by [19] and [20] learn the
+word embeddings using the corpus and taxonomy information
+Recently, transformer based models have become popular in
+data) to efﬁciently learn millions of parameters [24].
+such models provide contextual embeddings for words which
+which incorporate additional taxonomic information train two
+tasks simultaneously: 1) Masked Language Modeling and 2)
+like [27] require generation of graph based embeddings while
+The K-adapter model proposed in [29] require additional
+A supervised method is proposed in [30], where information
+The Dict2Vec model presented in [33] learns embedding for
+various words using deﬁnitions provided in dictionaries like
+by [34] learns embeddings for taxonomy terms using their
+Based on the literature review, we note that there is a lack of
+paper, we propose a novel approach (namely Custom Word
+Embedding Model (CWEM), which is summarized below:
+sources while learning word embeddings.
+learn from both bodies of information (contextual and
+The model does not require the taxonomy terms to be
+dataset of maintenance records see Fig. 1.
+of the equipment that caused the maintenance action, as
+identify the clusters based on a similarity measure.
+B. Basics Steps for Clustering of Textual Data
+Vocabulary: The set of all available words constitutes a
+Document: A document is a collection of words which is
+(maintenance record) in Fig. 1 constitutes a document.
+The ﬁrst step in clustering of textual data is to design an
+In other words, this mathematical representation is critical inthe model’s clustering performance.
+different representations are available like Latent Semantic
+model is chosen as the basic representation for our study (we
+provide more details regarding the SG model in Section III-A).
+next step is to identify the clusters present in the corpus.
+(please see [39] for a recent review).
+clustering algorithms is to minimize the distance of word
+along with the semantic knowledge to learn industry-tailored
+word embeddings.
+are similar to each other while tokens in different classes
+information, the architecture for the SG model (Section III-A)
+information by modifying the loss of the SG model as detailed
+Use maintenance records to create corpus
+(weights of neural network ~ Standard Normal with zero bias)Process taxonomy tokens
+Create sets to calculate two different 
+for tokens in different taxonomy class
+Learn model parameters by minimizing modified loss: 
+A. Distributed Representation of a Word
+We use Skip Gram (SG) [13] model for
+which implies that words which represent similar meaning are
+basic neural network architecture of the SG model.
+The SG model learns a vector representation (known as
+The number of neighboring words that are used to
+learn the vector representation for a given input word consti-
+objective of the SG model is to generate a vector representation
+for the given input word which helps to predict the correct
+context word with a high accuracy.
+context) word pairs become: (leaking, caused), (leaking, by),
+The SG model then learns
+score for the true contextual word.
+We denote an input word by wIand its vector representation
+a neural network architecture having an input layer, a hidden
+words present in the vocabulary V(as shown in Fig. 3).
+input word which we are learning.
+connected to the output layer using a different weight matrix
+which gives us the probability of observing a contextual word
+wc;jfor a given input word wIat thecthcontext position.
+soft-max score is highest for the true contextual word which
+are passed while training the neural network as compared to
+The semantic information for each context word wc;j
+corresponding to the given input word wIis learned as a
+Here, wO;cis the actual cthcontext word speciﬁed while training the neural network.
+word at that position.
+the probability of the observed context words for the given
+input word (equation 2).
+cis the index of the actual output context word occurring at jthindex
+true/positive context words.
+Negative samples (present in set
+have the least probability to occur as contextual words for a
+given input word.
+wherewjis the output word (positive sample), v0
+Fig. 3: Neural Network architecture for the Skip Gram model.
+B. Proposed Custom Word Embedding Model (CWEM)
+Having learned the contextual/semantic information, we now
+Let Mbe the set of classes present
+constitute different classes of the failure mechanism taxonomy.
+In Fig. 1, the words ‘vibration’ and ‘stick’ belong to the
+different sets as shown in Fig. 4.
+of tokens belonging to the same class while the second set
+contains pairs of tokens belonging to the different classes.
+have similar word embeddings while the tokens belonging
+to different class should have dissimilar word embeddings.
+words present in different taxonomic classes which would help
+include taxonomic information in the learnt embedding.
+We deﬁne two different kinds of clustering measures.
+measures the dissimilarity between tokens (words) within the
+dissimilarity between the embedding vectors of tokens (words)
+between different tokens belonging to the same taxonomy class
+M. LetwT;mkdeﬁne the token (word) from taxonomy class
+vector representation for words wT;mkpandwT;mkqbelonging
+tokens (words) in BCS, we would like to have the dissimilarity
+between vectors of tokens from different taxonomy class
+As we propose to learn the semantic and taxonomic informa-
+tion simultaneously, the tokens (words) of the taxonomic classborrow their embedding vectors from the same weight vector
+of efﬁcient word embeddings.
+as the Custom Word Embedding Model loss (CWEM loss) and
+The simultaneous learning in CWEM takes information from
+sets (shown in Fig. 4).
+information to be incorporated in the learned embedding.
+the user ﬁnds essential to incorporate in the generated word
+taxonomic information in the generated word representation.
+Fig. 4: Tokens in WCD and BCS sets of the CWEM.
+Fig. 5: Intuition for using two information sources for better rep-
+represent learning through the similarity of taxonomic tokens to
+ﬁrst sentence, the word ‘loosened’ learns semantic information
+for the second sentence, the word ‘leak’ learns semantic
+increase the similarity between the words ‘loosened’ and
+For our analysis, we use data obtained from eight systems (like
+1:Initialize weights for different layers
+2:Create the WCD sets, having words from same taxonomy class
+3:Create the BCS sets, having words from different taxonomy
+records shown in Fig. 1 are a representative sample of the
+proposed model using two different Settings.
+we use the failure mechanism taxonomy and try to cluster
+maintenance records that are associated with similar failure
+For Setting 2, we use the hierarchical equipment
+In Setting 2, we try to cluster maintenance records that
+1) Setting 1: On Basis of Failure Mechanism
+Here, our aim is to identify clusters of maintenance records
+which describe maintenance events caused by similar failure
+We consider uni-gram (single word) tokens for this
+Tokens in the taxonomy are processed using steps
+which represent the base form of the words (e.g., for the token
+2) Setting 2: On Basis of Mud-Pump Equipment Taxonomy
+In this Setting, our aim is to identify the cluster of mainte-
+TABLE II: Number of terms in failure mechanism taxonomy groups
+incorporates information from a single hierarchy taxonomy,
+of each sub-unit into a set which we term as sub-parts.
+are many sub-parts which have multiple words in them and
+Word tokens present in multiple sub-branches are
+Sets of tokens required to develop the model
+We train the word embeddings using the CWEM for each
+Setting separately and generate separate word embeddings
+vector for each word is initialized using a standard normal
+To train the algorithm, we choose the word
+(a) Processing failure mechanism taxonomy.
+Fig. 6: Setting 1 data preparation.
+TABLE III: A sample of equipment taxonomy for mud-pump
+TABLE IV: Number of terms in equipment taxonomy groups
+the number of words to be randomly sampled from the context
+competitive models to compare the performance of clustering
+represents the original skip-gram model in our setting.
+2)GoogleNews: Google‘s set of global word embed-
+dings which contain pre-trained word embeddings de-
+posed by [18] uses pre-trained word embeddings and
+note that, for Attract-Repel model, elements of WCD set
+4)Dict2Vec: The Dict2Vec model presented in [33] learns
+embedding for various words using dictionary deﬁni-
+Oxford, etc., to incorporate the meaning of each word
+while learning word embeddings.
+while learning word embeddings.
+trained word embeddings for Dict2Vec with embedding
+Between Class Similarity Set
+Between Class Similarity Set
+Fig. 7: Setting 2 data preparation.size of 100 and also use Dict2Vec as a base embedding
+5)Joint Rep using GloVe: The joint learning model that
+proposes to use a single step joint learning model which
+To perform the experiment, documents from the
+processed corpus are selected for the two different Settings.
+We select a random sample of L= 100 documents for Setting
+distance matrix is generated for maintenance records using
+word embeddings from each model (competitive and CWEM).
+between documents is measured using the Words Mover Dis-
+the minimum amount of distance that the embedded words
+words of another document.
+(b) Silhouettes analysis for SG (CWEM with = 1.0) model
+(b) Silhouettes analysis for SG (CWEM with = 1.0) model
+(c) Silhouettes analysis for Attract-Repel (SG) Model
+Fig. 8: Comparison of silhouettes analysis for CWEM with = 0.65
+To evaluate the models’ performance, we use the Adjusted
+The ARI and SSc scores obtained from the clustering analysis
+analysis for the CWEM with = 0.65, SG model and Attract-
+The training time for 100 batches of Attract-RepelTABLE V: Comparison of model performance
+model with Skip-Gram embeddings is 18 seconds, whereas, it
+The results for both the Settings of all the models are
+better than their corresponding baseline models.
+for CWEM as compared to the competitive models.
+on the documents for Setting 2 which results in a higher
+model does not perform well in the experiments.
+model performs pretty well for Setting 1 as taxonomy terms
+However the model performance
+as can be seen in Setting 2 results.
+100 documents from which we create a balanced set of 50
+the sampled set.
+to analyze the performance of each model and is tabulated in
+consideration (as in Setting 2), the model performs well even
+We use information from two sources (namely semantic
+the word distribution, and a weighting parameter governs
+words as compared to the traditional two-step procedure.
+yield clusters by using information present only within the
+the presence of an available taxonomy, the model will identify
+clusters based on the taxonomy.
+similar based on the provided information.
+way of combining different sources of information to identify
+That is, two documents can belongto one cluster with respect to one taxonomy, while they may
+belong to different clusters with respect to another taxonomy.
+For example, the clusters of documents in Setting 1 would
+represent records from different failure mechanisms, this in-
+the clusters obtained by CWEM in Setting 1.
+the clusters represent different components or sub-units of the
+equipment that required maintenance, thus, clustering them
+For future research, the current model
+De, “A data-and ontology-driven text mining-
+based construction of reliability model to analyze and predict component
+failures,” Knowledge and Information Systems, vol.
+“Valuing free-form text data from maintenance logs through transfer
+learning with camembert,” Enterprise Information Systems, pp.
+support system based on ontology and data mining to improve design
+using warranty data,” Computers & Industrial Engineering, vol.
+“Matching with text data: An experimental evaluation of methods for
+order data for reliability analysis,” Journal of Quality in Maintenance
+“Industry speciﬁc word embedding and its application in log classiﬁ-
+word representations in vector space,” 1st International Conference on
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+network,” in Proceedings of the 2016 Conference on Empirical Methods
+“Jointly learning word embeddings using a corpus and a knowledge
+“Joint word representation learning using a corpus and a semantic lexi-
+for word representation,” in Proceedings of the 2014 conference on
+empirical methods in natural language processing (EMNLP), 2014, pp.
+language inference models enhanced with external knowledge,” arXiv
+transformer-based language models with commonsense representations
+hanced language representation with informative entities,” arXiv preprint
+M. Zhou et al., “K-adapter: Infusing knowledge into pre-trained models
+label text classiﬁcation,” in International Conference on Artiﬁcial Neural
+Habrard, “Dict2vec: Learning word
+Conference on Empirical Methods in Natural Language Processing,
+“Translating embeddings for modeling multi-relational data,” in Neural
+Representation of Knowledge,” Psychological Review, vol.
+Journal of Machine Learning research, vol.
+collection and exchange of reliability and maintenance data for equip-
+terests include unstructured natural language data
+His research interests include data-driven

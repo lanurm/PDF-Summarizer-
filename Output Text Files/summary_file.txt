@@ -1,0 +1,1960 @@
+Summary for paper1.pdf:
+Abstractive Summary (Page 1):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS 1
+Optimizing Attention for Sequence Modeling via
+Reinforcement Learning
+Hao Fei, Yue Zhang ,Member, IEEE , Yafeng Ren , and Donghong Ji
+Abstract — Attention has been shown highly effective for model-
+ing sequences, capturing the more informative parts in learning
+a deep representation. However, recent studies show that theattention values do not always coincide with intuition in tasks,
+such as machine translation and sentiment classiﬁcation. In this
+study, we consider using deep reinforcement learning to automat-ically optimize attention distribution during the minimization ofend task training losses. With more sufﬁcient environment states,iterative actions are taken to adjust attention weights so that moreinformative words receive more attention automatically. Resultson different tasks and different attention networks demonstratethat our model is of great effectiveness in improving the end taskperformances, yielding more reasonable attention distribution.The more in-depth analysis further reveals that our retroﬁttingmethod can help to bring explainability for baseline attention. Index Terms— Attention mechanism, deep reinforcement learn-
+ing (RL), natural language processing (NLP), neural networks. I. I NTRODUCTION
+THE attention mechanism has been applied to a range of
+natural language processing (NLP) tasks, such as neural
+machine translation [1], [2], dialog generation [3], machine
+reading/comprehension [4], sentiment classiﬁcation [5], and
+text summarization [6]. It calculates the context representation
+of a sentence as a weighted sum of individual components,
+automatically selecting more important parts of an inputsequence.
+
+Extractive Summary (Page 1):
+Optimizing Attention for Sequence Modeling via Reinforcement Learning Hao Fei, Yue Zhang ,Member, IEEE , Yafeng Ren , and Donghong Ji Abstract — Attention has been shown highly effective for model- ing sequences, capturing the more informative parts in learning a deep representation.
+Resultson different tasks and different attention networks demonstratethat our model is of great effectiveness in improving the end taskperformances, yielding more reasonable attention distribution.The more in-depth analysis further reveals that our retroﬁttingmethod can help to bring explainability for baseline attention.
+THE attention mechanism has been applied to a range of natural language processing (NLP) tasks, such as neural machine translation [1], [2], dialog generation [3], machine reading/comprehension [4], sentiment classiﬁcation [5], and text summarization [6].
+This work was supported in part by the National Natural Science Foundation of China under Grant 61702121 and Grant 61772378, in part by the National Philosophy SocialScience Major Bidding Project under Grant 11&zd189, in part by the ResearchFoundation of Ministry of Education of China under Grant 18JZD015, in part by the Key Project of State Langua ge Commission of China under Grant ZDI135-112, and in part by the Guangdong Basic and Applied Basic Research Foundation of China under Grant 2020A151501705.
+Though bringing considerable improvements on various tasks in NLP, attention weights can fail to capture the mostinformative part of the content and do not always satisfy the needs of end tasks [14], [15].
+1Intuitively, the attention mechanism should properly highlight the elements that are task-related, as the examples marked in blue.
+In fact, a large proportion of thewords with higher attention weights is not important or task- related, such as stop words, which are the examples visualized with red.
+In attention models, the weights obtained can be regarded as unsupervised signals learned during the optimization of the end task.
+
+Abstractive Summary (Page 2):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. 2 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+Fig. 2. Overall architecture of DRGA. has been shown effective for various NLP tasks [19], [20]. In this article, we investigate the effectiveness of deep RLfor obtaining better attention weights, by designing a novel
+sequential decision process that iteratively modiﬁes original
+attention weights given a baseline attention network. In particular, as shown in Fig. 2, given a baseline network,
+actions are dynamically taken to either increase or decreasethe attention score of each node. A delayed reward is used
+to guide the learning of the policy network.
+
+Extractive Summary (Page 2):
+In this article, we investigate the effectiveness of deep RLfor obtaining better attention weights, by designing a novel sequential decision process that iteratively modiﬁes original attention weights given a baseline attention network.
+Similar to the naive attention mechanism, the optimization of attention via our RL framework are derived solely from loss minimizationof the end task, without using external guidance.
+We compare RL-adjusted attention weights with the original attention weights on four types of attention mechanisms,including general attention [21], SA [10], hierarchical atten- tion [13], and attention-based encoder–decoder [2].
+Further in-depth analysis proves that the explainability of the attention mechanism largely depends on the exact attention architectures and the end tasks.
+For example, Niculae and Blondel [17]use a smoothed max-operator as the replacement of softmax attention to give more interpr etability without sacriﬁcing the performance of the atte ntion mechanism.
+In contrast, we let the attention module sufﬁciently and directly access the end task loss underboth the global and the local scope, and calculate revised atten- tion weights dynamically using an RL framework, to better capture informative elements.
+On the other hand, the capacity of attention representation of transformer has been much studied (e.g., the syntax-aware feature induction [28]–[30]).In this article, we show that the transformer attention can also be enhanced via our framework.
+Others argue that attention does not necessarily correspond to impor- tance, and the explainability of the attention mechanism is denied [35], [36].
+
+Abstractive Summary (Page 3):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. FEI et al. : OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 3
+Some work employs RL to enhance machine learning meth-
+ods rather than certain tasks. For example, Fang et al. [39]
+investigate RL for active learning, Wu et al. [40] inves-
+tigate RL for cotraining, and Chen et al. [41] investigate
+RL for self-training. Our work more closely relates to the
+work of Indurthi et al. [42], who exploit deep RL over base-
+line hard-attention mechanisms for improving NMT on long
+sequences [42]. In this article, we employ policy gradient for sampling
+actions, which can maintain the exploration and avoid getting
+stuck at an intermediate state [43], [44]. For continuous control
+of continuous attention weights, we use the probabilistic policygradient algorithm [45] with action sampling from a Gaussian
+distribution. III. F
+RAMEWORK
+We formulate attention distribution amendment as a sequen-
+tial decision process and employ RL since: 1) it provides a
+sequential-decision scheme at the token level for dynamical
+optimization without any supervision and 2) it takes into
+account sufﬁcient environment states when making every
+decision. Our RL method uses the environment as a consultant
+at each time step to dynamically revise weights, by modelingweight-assigning as a sequential decision process, which can
+be more intuitive and reasonable.
+
+Extractive Summary (Page 3):
+The policy network obtains rewards from the attention network’s prediction, which, in return, guides the learning of the policy for adjusting attention weights.
+Policy Network Formally, we design the RL agent as policy network π θ(s,a)=P(a|s;θ),w h e r e sstands for the state, arepresents the action, and θindicates the parameters of the model.
+Instead of using a deep Q-network, which learns a greedy policy for discrete actions, we employ the policy gradient algorithm [44] for sampling actions, due to the need for continuous control of attention weights.
+1) State: At each time step t∈{1,2,..., n},as t a t e s t consists of the word vector wt∈RDwof the current element, the hidden representation ht∈RDhof the current element, a weighted representation h∗ t∈RDhof the current element, the sum of the original weighted element hs∈RDh, the con- catenation of all elem ent representation hat=[h1;...;hn]∈ Rn∗Dh, and the query representation u∈RDu.
+The word vector wtand the hidden representation htof the current element provide basic information of the element itsel f. The weighted representation of the current element h∗t=αt∗htis the dot product of the original weight and the hidden representation, alternatively.
+The output of the agent is a description of the Gaussian distribution for the action π(st;θ)=N(μ(s t,θ), σ( st,θ)) at∼π(st;θ) (2) where μandσare the mean and standard deviation.
+Once all the actions for the input sequence are decided, the adjustingmodule increases or decreases the corresponding attentionscore based on the action values.
+Speciﬁcally, a new weight score is the sum of the original value and the corresponding action value.
+
+Abstractive Summary (Page 4):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. 4 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+policy network to compute reward RLfor leading to task-
+relevant attention. To obtain a delayed reward based on the
+attention network’s prediction, we perform action sampling
+over the entire sequence. The reward is crucial for the RL agent to optimize its policy. To encourage the agent to make proper adjustments, we addan additional term to regulate the number of highly weightedelements. Considering that the salient words in a sequence
+should be neither too many nor too few, we employ a unimodal
+function f(x)=x+L
+0/x, which has a minimum value at
+x0=√
+L0. Thus, the reward is
+RL=logP(y|X)−γ(L/N+N·L0/L) (5)
+where Ldenotes the length of the sequence, Nis the number
+of highly weighted elements,2andγis a harmonic factor to
+balance the two parts. The second term encourages Nto be√
+L0·L, which means that, for instance, when L0=0.01,
+a sequence with a length of L=10 has around one salient
+element. 4) Objective: We train the policy gradient agent using the
+REINFORCE algorithm [47], which aims to maximize theexpected reward
+J(/Theta1)=E
+(st,at)Pθ(st,at)R(s1a1···sTaT)
+=/summationdisplay
+s1a1···sTaT/productdisplay
+tp(at|st;θ)RL (6)
+where p(a|s;θ)indicates the probability of a generated action
+a.
+
+Extractive Summary (Page 4):
+Thus, the reward is RL=logP(y|X)−γ(L/N+N·L0/L) (5) where Ldenotes the length of the sequence, Nis the number of highly weighted elements,2andγis a harmonic factor to balance the two parts.
+4) Objective: We train the policy gradient agent using the REINFORCE algorithm [47], which aims to maximize theexpected reward J(/Theta1)=E (st,at)Pθ(st,at)R(s1a1···sTaT) =/summationdisplay s1a1···sTaT/productdisplay tp(at|st;θ)RL (6) where p(a|s;θ)indicates the probability of a generated action a.
+Thereafter, we apply the likelihood ratio for calculating the gradients of the policy network /triangleinv/Theta1J(/Theta1)=/summationdisplay tRL/triangleinv/Theta1logp(a|s;θ).
+Attention Network The attention network is used to : 1) produce initial attention weights (a probability distribution) for a sequence of elements and 2) make a prediction for a speciﬁc task given a ﬁnal attention based representation.
+2The tokens are ﬁrst sorted by their attention values within the sequence from the largest to the smallest, before the accumulated values are calculated token by token.
+For multilayer and multihead, attention weight is a K×Nmatrix ( K is the number of layers or heads and Nis the attention length), which can be regarded as Kindependent attention arrays.
+The attention network calculates the context representation c/primeusing the revised attention weights α/primeand hidden represen- tation hivia (10).
+C. Training A cross-entropy loss function is employed to train the attention network L=−/summationdisplay X∈DK/summationdisplay 1ˆp(y,X)logP(y|X) (12) where ˆ p(y,X)is the gold distribution of X.
+
+Abstractive Summary (Page 5):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. FEI et al. : OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 5
+Algorithm 1 Training Procedure for DRGA
+Require:
+1) Pretrain the attention network via Eq. (12);
+2) Fix the parameters of the attention network and pretrainthe agent via Eq. (7);
+3) Co-train the overall framework under following steps
+until convergence. Ensure:
+1:for each input sequence sido
+2: Feed the Xinto attention network;
+3: Compute attention weights αforsiby attention network
+via Eq. (8) and Eq. (9);
+4:for each time step tin sequence do
+5: Prepare the states stin Eq. (1);
+6: Sample an action atvia Eq. (2);
+7:end for
+8: Adjust original attention values by Adjusting module viaEq.
+
+Extractive Summary (Page 5):
+(12); 2) Fix the parameters of the attention network and pretrainthe agent via Eq.
+We set the dimension of both hidden states of the agent and word vectors as 300.
+SA has the capability of modeling the dependencies between tokens from the same sequence.
+The experi- ments are conducted on the NMT task, based on the corporaof WMT14 English–German and WMT15 English–German, which are English to German translation data sets.
+C. Development Experiments We conduct several development experiments on the SUBJ development data set, based on the LSTM +SA with DRGA.
+1) Regulating Factors: In our framework, the adjusting scale βis designed for the adjusting increment, and the harmonic factor γis used for balancing the RL agent reward.
+Besides, βregulates the adjusting rates; t herefore, we investigate the impact of βon the converging time.
+Besides, when the initial value of βis above 0.4, the time for the model to converge is shortened toaround 50 min.
+
+Abstractive Summary (Page 6):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. 6 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+Fig. 3. Inﬂuences of regulating factors. (a) Accuracy over βandγ. (b) Training time over β. (c) Accuracy over√
+L0. (d) Accuracy over δ. TABLE II
+RESULTS OF SA W ITHDRGA.
+
+Extractive Summary (Page 6):
+Fig.
+(a) Accuracy over βandγ.
+(d) Accuracy over δ.
+We introduce L0to guide the learning of salient words number and the accumulated threshold δfor ﬁltering highly weighted elements.
+From the ﬁgure, we can see that, with√ L0=0.2a n dδ =0.85 on the SUBJ data set, DRGA achieves the best result.TABLE III
+The above analysis shows that these regulating factors should be ﬁne-tuned for DRGA to reach the best performance on different data sets for different tasks.
+2) Settings of RL Agent: To avoid complex optimization, we employ the light-weighted FFN as the RL agent.
+Restrictions apply.
+
+Abstractive Summary (Page 7):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. FEI et al. : OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 7
+TABLE V
+RESULTS ON NMT T ASKS
+explore the performances of different numbers of parameters
+and the FFN topology of the RL agent. From the results
+shown in Table I, we can see that more parameters or morehidden layers do not always improve the performance. By
+using a two-layer FFN with 300-dim hidden size, the RL agent
+gives the best performance while keeping a comp arably simple
+architecture. Overall, we see that a simple light-weighted MLPnetwork can bring good improvements for baseline attention. D. Quantitative Results
+The ﬁnal experimental results are shown in Tables II–V. For
+the task of text classiﬁcation on data sets with SA, both LSTM
+and CNN achieve competitive results, as shown in Table II.By integrating DRGA, the pe rformances of almost all the
+SA baselines are improved on each data set. These results
+demonstrate the effectiveness of the DRGA for optimizing the
+SA. We also compare our model with Zhou et al. (2018),
+which use two-branch architecture to shift the attention to
+different parts of a sentence.
+
+Extractive Summary (Page 7):
+For the task of text classiﬁcation on data sets with SA, both LSTM and CNN achieve competitive results, as shown in Table II.By integrating DRGA, the pe rformances of almost all the SA baselines are improved on each data set.
+As shown in Table IV, DRGA improves the UPA model on the IMDB data sets by 1.8% and the Yelp 2013 data setsby 1.2% and helps HUAPA by 1.2% on IMDB and by 0.2% on Yelp 2014.
+Attention weights of stop words, which are less informative for the task, are effectively weakened by DRGA.The optimization effect is more evident for long sentences due to the restraint of the additional term of reward, as described in subsection of Reward .
+We can ﬁnd that the transitions from the original attention weights to ﬁnal revised weights are sta- ble and continuous, and some important words for the taskreceive increasingly more prope r attention when the iteration increases.
+To see how many sen- tences are optimized, we compared the original highlighted token numbers from the attention module and the highlighted token numbers that are revised by DRGA, in a ﬁne-grainedscope.
+The results are shown in Table VIII.We ﬁnd that, for each data set, DRGA decreases the count oforiginally highlighted words, with a maximum reduction rate of 23.8% on the SST data set and 18.3% on the AGnews data set.
+We ﬁnd that: 1) parts of the most highly selected words are stop words, such as a, that, and with,which can be uninformative for the task and 2) DRGA adjusts the weights’ distribution for frequently highlighted tokens to a more reasonable proportion.
+The attention interpretability can be expressed as follows: if the learned attention weights agree with natural measures of feat ures importance, the alterna- tive of counterfactual attention distribution will correspond- ingly change the model output distribution most [34]–[36].
+
+Abstractive Summary (Page 8):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. 8 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+TABLE VI
+VISUALIZATION OF ATTENTION WEIGHTS FOR BASELINE ATTENTION MODELS BEFORE AND AFTER THE OPTIMIZA TION FROM OURFRAMEWORK
+TABLE VII
+TRANSITION OF ATTENTION WEIGHTS BY TANSFORMER +DRGA B ASED ON THE EXAMPLE SENTENCE FOR CLASSIFICATION TASK
+TABLE VIII
+COMPARISONS OF HIGHLIGHTED TOKEN NUMBERS BETWEEN
+BEFORE AND AFTER DRGA
+we explore the relative importance when the attention distri-
+bution has been changed. Using ito denote the token with
+the highest attention αiin the sentence, we compare how i
+inﬂuence the model’s output distribution, by comparing theimportance of iwith the other random attended element r,
+which is drawn uniformly from the same sentence. Concretely,we measure the difference of two Jensen–Shannon (JS) diver-
+gences
+/Delta1JS=JS(p,q
+{i})−JS(p,q{r}) (13)
+where JS (p,q{i})is the JS divergence of the model’s original
+output distribution pand the output distribution q{i}after
+removing the learned most important token iin attention, and
+the second JS divergence is the counterpart after removing the
+rin its attention. Intuitively, if iis truly the most important
+element, the change of output distribution by removing ican
+be the greatest, and correspondingly, we can expect /Delta1JS to be
+positive. Based on several different attention architectures and
+data sets, we plot /Delta1JS against /Delta1α=αi−αr.Fig. 4. 25 most modiﬁed words on SUBJ. As shown in Fig.
+
+Extractive Summary (Page 8):
+we explore the relative importance when the attention distri- bution has been changed.
+Using ito denote the token with the highest attention αiin the sentence, we compare how i inﬂuence the model’s output distribution, by comparing theimportance of iwith the other random attended element r, which is drawn uniformly from the same sentence.
+Concretely,we measure the difference of two Jensen–Shannon (JS) diver- gences /Delta1JS=JS(p,q {i})−JS(p,q{r}) (13) where JS (p,q{i})is the JS divergence of the model’s original output distribution pand the output distribution q{i}after removing the learned most important token iin attention, and the second JS divergence is the counterpart after removing the rin its attention.
+Intuitively, if iis truly the most important element, the change of output distribution by removing ican be the greatest, and correspondingly, we can expect /Delta1JS to be positive.
+First, for all the vanilla attention, only /Delta1α larger than 0.6 can activate above-zero /Delta1JS, while /Delta1α threshold is around 0.2 in the attention improved by DRAG, whichmeans that the retroﬁtted attention network can help to cor-rectly adjust the most intuitive token i.
+Second, the same attention in different data sets can yield distinct capabilityof explainability, which can be found in Fig.
+5(a) and (b), where DiSAN has different /Delta1α threshold on the SST and SUBJ data sets.
+Restrictions apply.
+
+Abstractive Summary (Page 9):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. FEI et al. : OPTIMIZING ATTENTION FOR SEQUENCE MODELING VIA RL 9
+Fig. 5. JS divergence gap ( /Delta1JS) ( Y-axis) between attention distribution against /Delta1α of attention weight ( X-axis) between the most important token iand
+random selected token r. The results at the topper row in blue color are from the raw atten tion model, and the results at the corresponding bottom row in green
+color are from the attention retroﬁtted by DRAG. (a) DiSAN-SST. (b) DiSAN-SUBJ. (c) IAN-Sem14. (d) IAN-Sem15. (e) Trm-WMT14.
+
+Extractive Summary (Page 9):
+JS divergence gap ( /Delta1JS) ( Y-axis) between attention distribution against /Delta1α of attention weight ( X-axis) between the most important token iand random selected token r. The results at the topper row in blue color are from the raw atten tion model, and the results at the corresponding bottom row in green color are from the attention retroﬁtted by DRAG.
+We retroﬁtted the attention mechanism for sequence model- ing in NLP, investigating a principled solution of deep RL foroptimizing attention by adding a policy network on top of a baseline attention network for adjusting the attention weights automatically.
+[6] W. Wang, S. J. Pan, D. Dahlmeier, and X. Xiao, “Coupled multi-layer attentions for co-extraction of aspect and opinion terms,” in Proc.
+Dai, C. Yin, S. Huang, and J. Chen, “Improving review representations with user attentio n and product attention for sentiment classiﬁcation,” in Proc.
+[16] C. Sen, T. Hartvigsen, B. Yin, X. Kong, and E. Rundensteiner, “Human attention maps for text classiﬁca tion: Do humans and neural networks focus on the same words?” in Proc.
+[17] V . Niculae and M. Blondel, “A re gularized framework for sparse and structured neural attention,” in Proc.
+Available: http://arxiv.org/abs/1806.03711 [20] T. Zhang, M. Huang, and L. Zhao, “Learning structured representation for text classiﬁcation via reinforcement learning,” in Proc.
+Available: http://arxiv.org/abs/1709.00893 [22] B. Zhang, D. Xiong, J. Xie, and J. Su, “Neural machine translation with GRU-gated attention model,” IEEE Trans.
+
+Abstractive Summary (Page 10):
+This article has been accepted for inclusion in a future issue of this journal. Content is final as presented, with the exception of pagination. 10 IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING SYSTEMS
+[23] H. Fei, Y . Ren, and D. Ji, “Implicit objective network for emotion
+detection,” in Proc. 8th Natural Lang. Process. Chin. Comput. , 2019,
+pp. 647–659. [24] H. Fei, Y . Zhang, Y . Ren, and D. Ji, “Latent emotion memory for multi-
+label emotion classiﬁcation,” in Proc.
+
+Extractive Summary (Page 10):
+Available: http://arxiv.org/abs/1804.06035 [41] C. Chen, Y . Zhang, and Y . Gao, “Learning how to self-learn: Enhancing self-training using neural reinforcement learning,” in P roc.
+[43] T. Degris, P. M. Pilarski, and R. S. Sutton, “Model-free reinforcement learning with continuous action in practice,” in Proc.
+[48] H. Chen, M. Sun, C. Tu, Y . Lin, and Z. Liu, “Neural sentiment classiﬁcation with user and product attention,” in Proc.
+Available: http://arxiv.org/abs/ 1408.5882 [52] X. Wu, Y . Cai, Q. Li, J. Xu, and H. -F. Leung, “Combining contextual information by self-attention mechan ism in convolutional neural net- works for text classiﬁcation,” in Proc.
+degree from Wuhan University, Wuhan, China, in 2018, where he is currently pursuing the Ph.D. degree with the School of Cyber Science and Engineering.
+degree in computer science from Tsinghua Uni-versity, Beijing, China, in 2003, and the M.S.
+He has been working on natural language processing over the past ten years, and has published 20 related papers injournals and conferences, including AAAI, EMNLP, and COLING.
+Donghong Ji received the B.E., M.E., and Ph.D. degrees from the Computer School, Wuhan Uni- versity, Wuhan, China, in 1988, 1991, and 1995,respectively.
+
+
+Summary for paper2.pdf:
+Abstractive Summary (Page 1):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+Encrypted Data Retrieval and Sharing Scheme
+in Space-Air-Ground Integrated Vehicular
+Networks
+Haoyang Wang, Kai Fan, Member, IEEE, Kuan Zhang, Member, IEEE, Zilong Wang, Member, IEEE,
+Hui Li, Member, IEEE, and Yintang Y ang, Senior Member, IEEE
+Abstract—As a smart transportation application of the Internet of Things (IoT), the Internet of Vehicles (IoV) depresses the chances of
+trafﬁc accidents, while improving transportation efﬁciency and user driving experience. However, as the number of vehicles continues
+to grow, the original ground-based IoV system is difﬁcult to meet the ever-increasing demand. To this end, Space-Air-Ground
+Integrated Network (SAGIN) incorporates satellite systems, aerial network and terrestrial communications. However, because SAGIN
+integrates multiple network services and communication modes, which makes SAGIN more vulnerable to various types of attacks and
+security threats. This paper ﬁrst presents the dominating security threats in data storage, transmission and sharing of space-air-ground
+integrated vehicular network (SAGIVN). Moreover, for guaranteeing the safety and effectiveness of the model, we advance a safe and
+effective encrypted data retrieval and sharing scheme in SAGIVN(ERDSS) for possible threats, the ERDSS can execute fuzzy retrieval
+over misspelling keywords and sort results by relevance scores to realize precise retrieval.
+
+Extractive Summary (Page 1):
+Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of Things Journal Encrypted Data Retrieval and Sharing Scheme in Space-Air-Ground Integrated Vehicular Networks Haoyang Wang, Kai Fan, Member, IEEE, Kuan Zhang, Member, IEEE, Zilong Wang, Member, IEEE, Hui Li, Member, IEEE, and Yintang Y ang, Senior Member, IEEE Abstract—As a smart transportation application of the Internet of Things (IoT), the Internet of Vehicles (IoV) depresses the chances of trafﬁc accidents, while improving transportation efﬁciency and user driving experience.
+However, as the number of vehicles continues to grow, the original ground-based IoV system is difﬁcult to meet the ever-increasing demand.
+Moreover, for guaranteeing the safety and effectiveness of the model, we advance a safe and effective encrypted data retrieval and sharing scheme in SAGIVN(ERDSS) for possible threats, the ERDSS can execute fuzzy retrieval over misspelling keywords and sort results by relevance scores to realize precise retrieval.
+T-HEemergence and development of IoV has promoted the integration of Internet of Things (IoT) and road trafﬁc, making road trafﬁc control safer and more efﬁcient, vehicles more intelligent as well.
+For example, the privacy and security of data transmission and storage cannot be guaranteed, and the coverage of network services is limited, etc.
+However, the service coverage of the two is limited, and both require high construction costs, high-speed moving vehicles need to frequently switch the Haoyang Wang is with the State Key Laboratory of Integrated Ser- vice Networks, Xidian University, Xi’an, Shaanxi, 710126 China e-mail: why19970701@163.com.
+With the continuous expansion of the IoV market, more and more vehicles and related facilities are integrated to it.
+The aforesaid disadvantages in the available IoV tech- nologies are primarily because of the fact that the exist- ing IoV architectures are ground-based to supply network access services for vehicles and in-vehicle applications.
+
+Abstractive Summary (Page 2):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+2
+architecture of SAGIVN as follows:
+Satellite
+UAV /
+Balloon /
+Airship
+Mobile Devices /
+Smart Vehicles /
+Building etc .Space Network
+Air Network
+Ground 
+Network
+Fig. 1: SAGIN Architecture
+It is worth noting that as SAGIVN contains a variety
+of diverse types of network interfaces and communication
+modes, it is prone to various types of attacks and threats. We
+need to fully consider various network attacks and security
+threats against SAGIVN. The attacker pretends to be a legitimate vehicle in
+SAGIN to transfer wrong information to other vehi-
+cles or perform a replay attack, thereby occupying
+network bandwidth and causing network communi-
+cation jams. When the vehicle interacts with the high-altitude
+communication platform such as satellite, UAV , HAP
+to perform location query or navigation services,
+the transmission information contains the vehicle’s
+private information, for instance, location, speed etc. If the intruder intercepts this kind of data, it could
+infer the vehicle’s driving route, resident location,
+hence posing threats to vehicle privacy and security.
+
+Extractive Summary (Page 2):
+When the vehicle interacts with the high-altitude communication platform such as satellite, UAV , HAP to perform location query or navigation services, the transmission information contains the vehicle’s private information, for instance, location, speed etc.
+For preventing attackers from directly invading the cloud server and ﬁlching data, it is necessary to preserve the privacy of the stored data.
+For misspelling of one letter, the ERDSS can acquire the fuzzy value by utilizing the misspelling keyword and the correct keyword.
+Beforegenerating query trapdoors, we need to utilize the dependency grammar and phrase structure tree to calculate the keyword weight in query keyword set, which plays an important role in query part to im- prove query accuracy.
+In the original SAGIN framework, the space-air layer re- quired to furnish access services to the ground through speciﬁc equipment, the communication between the space- air layer and the ground was relatively independent.
+It proposed to combine space-air-ground networks to increase the throughput and ﬂexibility of the backhaul network, while providing more effective network coverage for high-density and low-density areas.
+By introducing network function virtu- alization and software-deﬁned networking into the space- air layer, it offers joint resource management in a hybrid space-air-ground network to realize a ﬂexible and ﬂexible future network.
+Its dominating goals include early exploration and scientiﬁc evaluation and testing of space-air communication networks, and assessment of the application of ground-based communication technologies Authorized licensed use limited to: Dedan Kimathi University of  Technology.
+
+Abstractive Summary (Page 3):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+3
+in space-air networks. SATis5 [9] was activated in 2018. The project established a large-scale, real-time, end-to-end
+functional veriﬁcation test platform for SAGIN based on 5G
+communication technology. Despite the development of SAGIN has been contin-
+uously promoted, researchers have not yet proposed the
+SAGIN architecture with smart transportation as the appli-
+cation background. 2.2 Searchable Encryption
+Searchable encryption (SE) has been evolved as an signiﬁ-
+cant branch of cryptography since it was proposed by Song
+et al. [10] in 2000. SE could mainly separated into symmet-
+ric searchable encryption (SSE) and asymmetric searchable
+encryption (ASE) on the basis of construction method.
+
+Extractive Summary (Page 3):
+Dai et al. [15] presented a ranked multi- keyword SE scheme based on keywords splitting algorithm and binary tree in a hybrid cloud on the light of an equally dividedk means clustering.
+As an essential segment of the ﬁeld of AI, NLP promotes the continuous development of various ﬁelds of AI.
+The main goal of syntactic analysis is to determine the relationship between the components in a sentence, that is, the syntactic structure, which is mainly realized by the analysis of rhetorical structure anddependence relationship.
+2.4 Privacy-Preserving in IoV Zhou et al. [22] proposed a novel deferentially privacy- preserving location-based service usage framework de- ployed on the edge node, designed to provide an adjustable privacy protection solution to balance the utility and pri- vacy.
+The above schemes provide effective solutions for privacy-preserving in the IoV , but the privacy emphasized in these are mainly the location and trafﬁc data of the vehicle itself, while the outsourcing storage and sharing of data belonging to the vehicle has not yet been availably resolved.
+3.2 Cross-Language In many previous SE schemes, the system design only considered one language, and in reality, there will be mul- tiple languages in the database.
+In order to achieve cross-language search, the ERDSS ﬁrst utilizes the Uni-gram algorithm to split the search keywords into individual characters according to the language(Latin language, Stroke language) to which keywords belong, and then executes subsequent operations on the resulting characters.
+The deﬁnition of the Uni-gram algorithm and the the processes of diverse languages are as follows: Uni-gram Algorithm The Uni-gram algorithm be- longs to the N-gram algorithm in the statistical lan- guage model.
+
+Abstractive Summary (Page 4):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+4
+is to perform a sliding window operation of size N
+on the content of the text according to bytes, forming
+a byte of length Nfor fragment sequence, the Uni-
+gram algorithm adjusts the sliding window value
+to one character to form a byte fragment with a
+length of 1. In ERDSS, we implement the Uni-gram
+algorithm by Python. Encode & Encrypt (1)Latin Language. For languages
+based on Latin alphabets such as English, Italian,
+Portuguese and Spanish, we directly calculate ASCII
+codes with each single letter, then multiply the ASCII
+codes by the corresponding multiples based on the
+position of the letters in the word, ﬁnally add inte-
+gers of each letter together and encrypt it. (2)Stroke
+Language. For languages composed of strokes as ba-
+sic elements, such as Chinese, Korean and Japanese,
+etc, we construct the relevance between strokes and
+ASCII codes, then calculate the sum of the ASCII
+codes of each text.
+
+Extractive Summary (Page 4):
+Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of Things Journal 4 is to perform a sliding window operation of size N on the content of the text according to bytes, forming a byte of length Nfor fragment sequence, the Uni- gram algorithm adjusts the sliding window value to one character to form a byte fragment with a length of 1.
+For languages based on Latin alphabets such as English, Italian, Portuguese and Spanish, we directly calculate ASCII codes with each single letter, then multiply the ASCII codes by the corresponding multiples based on the position of the letters in the word, ﬁnally add inte- gers of each letter together and encrypt it.
+For languages composed of strokes as ba- sic elements, such as Chinese, Korean and Japanese, etc, we construct the relevance between strokes and ASCII codes, then calculate the sum of the ASCII codes of each text.
+3: Stroke Language 3.3 Dependency Grammar The main purpose of dependency grammar is to analyze the syntactic structure of a sentence to better understand the meaning of the sentence.
+In the dependency grammar, it can accurately identify the part of speech of thekeywords and the relationship between the keywords in the sentence and the subordinates.
+Compared with the traditional TFIDF algorithm, the optimized one adds the weight of the keyword position in the ﬁle when calculating the relevant score, so that the score between keywords and ﬁles becomes more accurate.
+The detailed process is depicted as Eq.1: s=P wi2Q(nwi=Lfi)Pk 1( fjtfj;wi) qP wi2W((nwi=Lfi)Pk 1( fitfj;wi))2 ln(1+N=N wi)qP wi2W(ln(1+N=N wi))2(1) where fjrepresents the weight coefﬁcient of the j-th part of the document, and its sum is 1; tfj;wirepresents the number of keyword wiin thej-th part;nwirepresents the number of keyword wi;Lfiis the length of the whole ﬁle fi.
+Furthermore, on the light of the infrastructure of the system model, the goals to be achieved by the ERDSS are put forward.
+
+Abstractive Summary (Page 5):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+5
+Smart Vehicles. As owners and users of data in
+SAGIVN, smart vehicles (SV) play an essential role
+in the system. The data privacy of vehicles will be in-
+cluded in the data uploaded to the system database. Adducing the road navigation in SAGIVN as a con-
+crete instance, the navigation request issued by smart
+vehicle contains its own ID number, hodiernal speed,
+location and destination, etc. The navigation instruct
+obtained by vehicle will exist navigation route, pass-
+ing point and other information. When SV initiates data query or communication req-
+uisition, it requested to produce trapdoors based on
+query keyword set.
+
+Extractive Summary (Page 5):
+As the basic unit for SV to provide computing and interconnection services, the NAP includes RSU on the ground layer, HAP on the sky layer and satellite cluster on the space layer.
+When the NAP receives the service request from the SV , it converts the information in request then trans- fers them to the database cluster (DC).
+The controller in the DC obtains results from corresponding sub- databases on the basis of the instruction and returns results to the SV through the NAP .
+After receiving the NAP instructions from diverse layers, the sub-databases pass them to the controller in DC, then the controller queries results from corresponding sub-databases and eventually returns to NAP .
+Furthermore, because of the strict standards of the SAGIVN model for communication response delay, the design of ERDSS needs to be adapted to the real-time transformation of the net- work topology structure to ensure efﬁcient commu- nication on the premise of safety.
+The ERDSS supports the addi- tion and deletion of data in DC and the updating of keywords in dictionary stored on NAP .
+The ERDSS strengths the security deﬁnition by preventing the NAP and DC from learning anything about the search pattern and access pattern.
+Secondly, by analyz- ing the security index, the cloud server cannot infer information about the ﬁle, including whether a ﬁle contains certain keywords and whether different ﬁles contain the same keyword.
+
+Abstractive Summary (Page 6):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+6
+Deﬁnition 4. Access Pattern. The association between the
+searched keywords and their relevant document identiﬁers should
+be indistinguishable for NAP . Deﬁnition 5. Semantic Security. Given the keyword set 
+and
+the security index ~I, the adversary Aforges a series of queries
+in any probability polynomial time(PPT).
+
+Extractive Summary (Page 6):
+Given the keyword set and the security index ~I, the adversary Aforges a series of queries in any probability polynomial time(PPT).
+The advantage of adversary Awinning in this security experiment is deﬁned as Eq.2: AdvA=jPr[b=b0] 1 2j (2) If no polynomial time adversary can win the above security experiment with a non-negligible advantage, the scheme satisﬁes semantically secure.
+As the ﬁrst part, the ”system initialization” section is mainly responsible for producing correlative parameters and keys for each entity, and completing the data process- ing.
+When SV queries or shares data, it needs to execute ”trapdoor generation” algorithm to get trapdoors, then NAP and DC execute ”search” algorithm after receiving trap- doors and return results to SV .
+When the system needs to be updated, AP and SV performs the algorithms in ”update” part to accomplish it.
+AP makes use of public parameter pp, a random number s2Z pto calculate key ciphertext as Eq.3: Ck= [C1=gs 1g sPn i=1H2(atti); C2=e(g;g )s; C3=Ke(g;h 1) s](3) The key ciphertext will be stored on the AP .
+When the SVs need to decrypt, they send their attribute sets to the AP , and AP will return the decrypted Kto the
+AP uses the SV’s paillier key pkcto encrypt the keywords in the dictionary and the letters in key- word (Latin Language) or one single character(Stroke Language) to acquire tuples as Eq.4: CIw1= ([w1]pk;([w11]pk;[w12]pk;; [w1len]pk)) ... CIwm= ([wm]pk;([wm1]pk;[wm2]pk;; [wmlen]pk))(4) Then AP uses the hash functions Hw(),Hf()the random function R(), the obtained keyword cipher- text tuple and ﬁle identiﬁer to generate an encrypted index, which its creating steps are illustrated as fol- lows: –Initializing a (m0n0)dimensional matrix , wheremm0,nn0(mis the maximum number of keyword set, nis the maximum number of data set), setting all elements in matrix to 0.
+
+Abstractive Summary (Page 7):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+7
+generate hash table f()that contains map-
+ping result f(fy), which the process is illus-
+trated as Eq.5:
+R(idy) =fy
+f(fy)!t(5)
+–Constructing the correspondence between ﬁles
+and keywords based on initializing matrix . If keyword wx(1xm)appears in ﬁle
+idy(1yn), the corresponding element
+in matrixis set to the optimized TFIDF
+value ofwxandidy, otherwise is set to 0. AP only transfers the encrypted index to NAP , the hash
+functionsHw(),Hf()and the random function R()are
+reserved by itself. Figure.5 shows the construction process
+of encrypted matrix index. 0
+ 0.40
+ 0.15
+ 0
+( 6)ww
+( 16)ww
+0.23
+ 0
+ 0
+ 0.33
+( 69)ww
+0.61
+ 0
+ 0
+ 0.17
+0
+ 0.32
+ 0.11
+ 0
+( 18)ff
+( 10)ff
+( 1)ff
+( 6)ff
+()wwn
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+'m
+'n
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+0
+ 0
+ 0
+ 0
+Initializing Matrix
+( 6)ww
+( 16)ww
+( 69)ww
+()wwn
+( 18)ff
+( 10)ff
+( 1)ff
+( 6)ff
+Encrypted Matrix
+Fig. 5: Matrix Index
+5.3 Trapdoor Generation
+Trapdoor generation consists of two parts.
+
+Extractive Summary (Page 7):
+If keyword wx(1xm)appears in ﬁle idy(1yn), the corresponding element in matrixis set to the optimized TFIDF value ofwxandidy, otherwise is set to 0.
+AP only transfers the encrypted index to NAP , the hash functionsHw(),Hf()and the random function R()are reserved by itself.
+Secondly, SVs take use of the paillier keypair to pro- duce trapdoors for keywords, then combine the weights and trapdoors to get the ﬁnal tuple.
+For each keyword in query set, the initial keyword relationship is 1, if the keyword has a syntactic relationship with other keywords, its weight becomes 1+R, where R represents the syntac- tic relationship.
+If there is syntactic relationship between them, the relationship ofq1andq2increases byd2 dR(q1;q2)andd1 dR(q1;q2) respectively, where d1andd2represent the distance between two keywords and their common ancestor nodes, and drepresents the distance between key- words, that is, d=d1+d2.
+For keyword q, its weight valueispz, wherepis the weight ratio of search keyword q, that is depicted as Eq.6, 1 +zP j=2R(qi;qj) zP i=1(1 +zP j=2R(qi;qj))(6) Therefore, the weight KW ofqis expressed as Eq.7: KW(q) =pz=(1 +zP j=2R(qi;qj))z zP i=1(1 +zP j=2R(qi;qj))(7) Taking ”multiple keyword search encryption” as an query set for example, the phrase structure tree and dependency grammar are depicted in ﬁgure.6 and ﬁgure.7 respectively.
+7: Dependency Grammar For example, the relationship between ”encryption” and ”multiple” is gained from the syntactic diagram, the distance between them is 5 from the phrase struc- ture tree, the syntactic relationship between them is R(amod) = 1=(ln5), the distance from ”encryption” and ”multiple” to its common ancestor are 3 and 2, so the weights of ”encryption” and ”multiple” are 2(ln5)=5 and3(ln5)=5 respectively.
+Taking advantage of the above method, the ﬁnal weights of ”encryption” and ”multiple” are calculated as KW(multiple) = 1 :23 andKW(encryption ) = 0:95 respectively.
+
+Abstractive Summary (Page 8):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+8
+Trapdoor Generation. SV makes use of their pail-
+lier keypair to encrypt the query keyword w. Fur-
+thermore, SV encrypts the letters or single charac-
+ter in keyword wto acquire the ciphertext tuple
+Tw=fCwjjCw1;;Cwleng. Eventually, SV adds
+the weight relevant with the keyword wto the tuple. 5.4 Search
+We introduce two ciphertext comparison algorithms used
+in the search phase: paillier ciphertext ﬁeld integer greater
+than or equal to comparison algorithm(CGE) and paillier
+ciphertext ﬁeld integer equal to comparison algorithm(CE). CGE. SV and NAP have a pair of paillier key pairs
+(pk;sk )and(pkNAP;skNAP)respectively, given two inte-
+gersaandb, encrypted with the same public key pkto get
+two ciphertext integers A= [a]pk,B= [b]pk.
+
+Extractive Summary (Page 8):
+The CGE algorithm is demonstrated in Algorithm.1: Algorithm 1 CGE Algorithm Input:A= [a]pk: the paillier ciphertext of integer a;B= [b]pk: the paillier ciphertext of integer b; Output: result
+The execution process of the CGE algorithm is described in detail as follows: 1) SV chooses a relatively small positive integer rand computesX= (A B)r. In accordance to the additive homomorphism of the paillier encryption algorithm, there exists (A B)r= (a b)r.
+2) NAP decrypts Xutilizing the private key skto acquire the plaintext x. Ifx0, let result = EncpkNAP(1), otherwise let result = EncpkNAP(0), and sends the result to the SV .
+3) After receiving the result, the SV decrypts it with the private key skcpand acquires result = DecskNAP(result ).
+The purpose of the CE algorithm is to determine whether the plaintext ais equal to bby calculating thetwo ciphertext integers A= [a]pkandB= [b]pk, so as to realize the function of accurate search.
+The main idea of the CE algorithm is to implement the CGE algorithm twice, as shown in Algorithm.2: Algorithm 2 CE Algorithm Input:A= [a]pk,B= [b]pk Output: result 1:temp1 = CGE(A;B ); 2:temp2 = CGE(B;A ); 3:result =temp1temp2; 4:Output result; In the search phase, after acquiring the trapdoor tuple TTS , NAP ﬁrst executes fuzzy search, puts the items match- ingTTS into the candidate set TTS0, then NAP makes use ofTTS0for accurate search to get the ﬁnal result set TTS00.
+The fuzzy search and accurate search are demonstrated in Algorithm.3 and Algorithm.4 respectively: Algorithm 3 Fuzzy Search Algorithm Input: Trapdoor tuple set TTS , Keyword number n, En- crypted index , Fuzzy value acc Output: Candidate keyword set TTS0 1:foreachi2[1;n] do 2:temp1 =CGE (Cwi;([wj]pk)=([acc128]pk)); 3:temp2 =CGE (([wj]pk)=([acc128]pk);Cwi); 4:temp =temp1temp2; 5: iftemp = 1 then 6:TTS0=TTS0[Cwi 7: end if 8:end for 9:ReturnTTS0 After NAP acquiring the ﬁnal result set TTS00, NAP takes the row vectors (vwi;vwj;;vwz)relevant with all items inTTS00from encrypted matrix .
+SV utilizes the symmetric key Kto decrypt the cipher- text data and obtain the plaintext set of the query result.
+
+Abstractive Summary (Page 9):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+9
+Algorithm 4 Accurate Search Algorithm
+Input: Trapdoor tuple set TTS , Candidate keyword set
+TTS0, Candidate keyword number t, Fuzzy value acc,
+the length of search keyword len, the length of wiLi
+Output: The ﬁnal result set TTS00
+1:foreachi2[1;t] do
+2:temp = 0;
+3: ifLilenthen
+4:p=len,q =Li;
+5: else
+6:p=Li,q=len;
+7: end if
+8: foreachj2[1;p] do
+9: foreachk2[1;q]do
+10: ifCE(Cwj;[wi]pk)then
+11: Li  ;
+12: break;
+13: end if
+14: ifk==Lithen
+15: temp + +;
+16: end if
+17: iftemp>acc then
+18: break;
+19: end if
+20: end for
+21: end for
+22: iftempaccthen
+23:TTS00=TTS00[Cwj
+24: end if
+25:end for
+26:ReturnTTS00
+0
+0.40
+ 0.15
+ 0
+6( 6)w w wv
+16( 16)w w wv
+0.23
+ 0
+ 0
+ 0.33
+69( 69)w w wv
+0.61
+ 0
+ 0
+ 0.17
+0.81
+0.32
+ 0.12
+ 0.49
+resultv
+1
+ 2
+ 66
+ n
+f
+( 18)ff
+( 10)ff
+( 1)ff
+( 6)ff
+
+
+81. 0
+1.01
+0.95Weight
+Fig. 8: Query Matching
+5.6 Update
+The update of the ERDSS is divided into two aspects: key-
+word update and data update. In this part, we will introduce
+two aspects respectively:
+Keyword Update Because only the ﬁle-based bi-
+directional hash table is stored on the DC, the SVdoes not need to transmit the status of the updating
+to the DC
+1) Keyword Addition. When SV adds keywords
+to the dictionary, they need to create an update
+tuple, which includes the operation instruction
+op= "addition" and the added keyword
+wadd. After AP receiving the tuple from SV ,
+AP ﬁrst computes TFIDF value between
+wadd and each ﬁle.
+
+Extractive Summary (Page 9):
+Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of Things Journal 9 Algorithm 4 Accurate Search Algorithm Input: Trapdoor tuple set TTS , Candidate keyword set TTS0, Candidate keyword number t, Fuzzy value acc, the length of search keyword len, the length of wiLi Output: The ﬁnal result set TTS00 1:foreachi2[1;t] do 2:temp = 0; 3: ifLilenthen 4:p=len,q =Li; 5: else 6:p=Li,q=len; 7: end if 8: foreachj2[1;p] do 9: foreachk2[1;q]do 10: ifCE(Cwj;[wi]pk)then 11: Li  ; 12: break; 13: end if 14: ifk==Lithen 15: temp + +; 16: end if 17: iftemp>acc then 18: break; 19: end if 20: end for 21: end for 22: iftempaccthen 23:TTS00=TTS00[Cwj 24: end if 25:end for 26:ReturnTTS00 0 0.40 0.15 0 6( 6)w w wv 16( 16)w w wv 0.23 0 0 0.33 69( 69)w w wv 0.61 0 0 0.17 0.81 0.32 0.12 0.49 resultv 1 2 66 n f ( 18)ff ( 10)ff ( 1)ff ( 6)ff   81.
+8: Query Matching 5.6 Update The update of the ERDSS is divided into two aspects: key- word update and data update.
+In this part, we will introduce two aspects respectively: Keyword Update Because only the ﬁle-based bi- directional hash table is stored on the DC, the SVdoes not need to transmit the status of the updating to the DC 1) Keyword Addition.
+When SV adds keywords to the dictionary, they need to create an update tuple, which includes the operation instruction op= "addition" and the added keyword wadd.
+The difference with addition operation is that when NAP receives the ciphertext [wdel]paillierof the key- wordwdel, NAP maps its position in matrix index through the hash function Hw(), and then deletes its relevant vector vdelfrom ma- trix index.
+Data Update The data update of the ERDSS is differ- ent from the keyword update.
+In the ERDSS, the ﬁle update is different from the keyword update.
+AP sends the new tuple (op;posfdel)to NAP and DC respectively, then NAP and DC performs the deletion operation in f()and matrix index stored by them.
+
+Abstractive Summary (Page 10):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+10
+AP transmits (op;[fadd]paillier )to DC, which
+is used to update the bi-directional hash table
+f()stored by DC. Simultaneously, AP deliv-
+eries tuples as Eq.11
+(op;[fadd]paillier;f([wn]paillier;(TFIDF )n)
+(11)
+jj(n=i;j;z;m;n;p)g) to NAP , which is used
+to update the matrix index stored by NAP . 6 S ECURITY DISCUSSIONS
+In this part we investigate to which extent the ERDSS fulﬁlls
+the security goals depicted in subsection 3.2 and security
+deﬁnition described in subsection 3.3. 6.1 Conﬁdentiality of outsourced data
+Outsourced data Security. For protecting the out-
+sourced data, AP applies AES-encryption on these
+plaintexts before producing matrix index. Compared
+with other symmetric encryption algorithms, AES
+has the characteristics of high security and efﬁciency.
+
+Extractive Summary (Page 10):
+The ERDSS distributes the security index and the outsourced data among distinct, not colluding NAPs to avoid revealing the access pattern information.
+6.2 Semantic Security The security of the ERDSS depends on the semantic secu- rity of the paillier homomorphic encryption algorithm.
+Assuming that Ain the polynomial time algorithm can win the security experiment in section 3.3 with a non- negligible advantage, then Acan be fabricated an algorithm &, which can undermine the semantic security of the random prediction model(ROM) encryption algorithm.
+Replacing the encryption operation in scheme with thecalculation of &, and then proving the security of the scheme through the security experiment given in section 3.3.
+Therefore, &has the same advantages as Ain winning the security experiment in distinguishing the semantic security encryption algorithm from the random prediction model.
+Moreover, the movement of SVs in SAGIVN will mod- ify the network topology of the system in real time, the topology will continue to affect SV communication.
+We ﬁxed other variables, utilizing diverse numbers of ENs in a region as variables to measure the communication delay, the results are depicted in ﬁgure.12: It can be observed from ﬁgure.12 that the introduction of ENs can enable efﬁcient communication among entities.
+Furthermore, it can be noted that the communication con- sumption is the lowest when the number of EN is 6, while the communication efﬁciency gradually decreases when the number is greater than 6.
+
+Abstractive Summary (Page 11):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+11
+TABLE 1: Comparison of the three schemes
+Scheme Fine-grained
+controlFuzzy
+searchVeriﬁable
+resultMulti-
+keywordHigh
+accuracy
+ERDSSp p p p p
+Wang et al. pp p
+Fu et al. pp
+5 6 7 8 910
+The number of edge server in system0.9511.051.11.151.21.251.31.351.4The computational time(ms)ERDSS
+Fig. 9: Communication Delay
+area is constant, and the number of ENs is too large. When
+the service provided for the SV is over-saturated, the data
+transmission will become the SV’s burden. In 2013, Cheng et al. [26] summarized and proposed
+solutions to the impacts of vehicle WiFi ofﬂoading caused by
+high physical mobility and ﬂuctuation of mobile channels in
+the IoV , which provided ideas for our subsequent research
+on how to balance computation overhead and communica-
+tion consumption. We simulate the ERDSS from four aspects of index con-
+struction, trapdoor generation, search and attribute encryp-
+tion, and plotted related data statistical graphs. The dataset
+used in the simulation is a dataset for a large movie review
+called ”Learning Word Vectors for Sentiment Analysis”.
+
+Extractive Summary (Page 11):
+We realized the ERDSS in the compiler Eclipse using the java language(the main scheme) and compiler Pycharm using the python language(natural language process).
+In this part, we take the same condition as the input for the simulation of the three schemes, and time consumption as the output.
+We adopt the same condition as the input for the simulation of the three schemes, and time consump- tion as the output.
+When the number of keywords in the query of the ERDSS changes from 6 to 10, a period of rapid growth of time cost occurs.
+Due to the introduction of NLP in the ERDSS, the time consumption of the ERDSS is higher than that of Wang et al.
+Figure.11(a) changes the size of data set on the premise that the dictionary size is ﬁxed, while ﬁg- ure.11(b) is opposite to the condition in ﬁgure.11(a).
+It can be acquired from the data in ﬁgure.11(a) that the search overhead of the ERDSS not be signiﬁcantly affected by the size of data set.
+It can also be inferred from ﬁgure.11(a) and (b) that the principal factor affecting the search efﬁciency is the size of the query set, which primarily owe to the search mechanism in the ERDSS.
+
+Abstractive Summary (Page 12):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+12
+500 1000 1500 2000 2500 3000
+The number of documents in database0100200300400500600Time Consumption(s)INDEX CONSTRUCTION
+Fu et al.
+Wang et al.
+ERDSS
+Fig. 10: Index Construction
+2 4 6 8 10 12 14
+The number of query keyword0100200300400500600700Time Consumption(ms)TRAPDOOR GENERATION
+Fu et al.
+Wang et al.
+ERDSS Fig. 11: Trapdoor Generation
+500 1000 1500 2000 2500 3000
+The number of documents in database2.52.522.542.562.582.62.622.642.662.682.7Time Consumption(ms)104 SEARCH
+ERDSS
+(a)
+5 10 15 20 25
+The number of keywords in query set3456789101112Time Consumption(ms)104 SEARCH
+ERDSS (b)
+Fig. 12: (a) For the size of data set varies from 500 to 3000 with the immobilized size of dictionary and query set to 500 and
+5, respectively. (b) For the size of query set varies from 5 to 25 with the immobilized size of data set and dictionary to 1000
+and 500, respectively. that of Fu et al.
+
+Extractive Summary (Page 12):
+12: (a) For the size of data set varies from 500 to 3000 with the immobilized size of dictionary and query set to 500 and 5, respectively.
+(b) For the size of query set varies from 5 to 25 with the immobilized size of data set and dictionary to 1000 and 500, respectively.
+The ERDSS performs more accurate than the other two in both fuzzy and exact search, which also testiﬁes that it is necessary to introduce NLP in the search stage to process the query set.
+The ERDSS utilizes the dependency syntax and phrase structure tree in NLP to handle query requests, correct spelling errors in queries, calculate weights for query keywords, and execute secure result queries based on encrypted data index efﬁciently.
+So as to ensure the security of the data sharing, the ERDSS integrates attribute encryption to realize the ﬁne- grained management of the SV identity authority, avoiding the excessive communication overhead and delay caused bybuilding large-scale encrypted broadcast channel.
+The ERDSS principally proposes relevant solutions from the perspective of entity data storage and sharing in SA- GIVN, but other aspects of security in SAGIVN also need to be guaranteed.
+Mean- while, Sun et al. [28], Liu et al. [29] and Lin et al. [30] respectively summarized the security threats existing in the Internet from the external, internal and software application perspectives and presented solutions, which can also pro- vide practical assistance for SAGIVN’s study in correlative ﬁeld.
+Wang et al. [31] reviewed the development of 6G technology in recent years from various aspects and summarized the security threats existing in 6G, which is also of guiding signiﬁcance for the future research direction of SAGIVN.
+
+Abstractive Summary (Page 13):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+13
+12345678910
+The number of query keywords90919293949596979899100Precision(%)EXACT PRECISION
+Fu et al.
+Wang et al.
+ERDSS
+(a)
+12345678910
+The number of query keywords6065707580859095100Precision(%)FUZZY PRECISION
+Fu et al.
+Wang et al.
+ERDSS (b)
+Fig. 13: (a) Fuzzy Search (b) Exact Search
+ACKNOWLEDGMENTS
+This work is supported by the National Key R&D Program
+of China(2017YFB0802300), the National Natural Science
+Foundation of China(No.61772403, U1836203), the Natural
+Science Foundation of Shaanxi Province(No.2019ZDLGY12-
+02), the Shaanxi Innovation Team Project(No.2018TD-
+007), the Xi’an Science and technology innovation
+plan(No.201809168CX9JC10) and National 111 Program of
+China B16037. REFERENCES
+[1] MAI, A, SCHLESINGER, and D, “A business case for connecting
+vehicles,” Cisco Internet Business Solutions Group, 2011. [2] “The future economic and environmental costs of gridlock in
+2030,” 2014. [3] Shen, Xuemin, (Sherman), Alhussein, Omar, Zhang, Ning,
+Zhuang, Weihua, and Y. and, “Software deﬁned space-air-ground
+integrated vehicular networks: Challenges and solutions,” IEEE
+Communications Magazine Articles News & Events of Interest to
+Communications Engineers, 2017. [4] W. Zhang, L. Li, N. Zhang, T. Han, and S. Wang, “Air-ground
+integrated mobile edge networks: A survey,” IEEE Access, vol.
+
+Extractive Summary (Page 13):
+This work is supported by the National Key R&D Program of China(2017YFB0802300), the National Natural Science Foundation of China(No.61772403, U1836203), the Natural Science Foundation of Shaanxi Province(No.2019ZDLGY12- 02), the Shaanxi Innovation Team Project(No.2018TD- 007), the Xi’an Science and technology innovation plan(No.201809168CX9JC10) and National 111 Program of China B16037.
+[3] Shen, Xuemin, (Sherman), Alhussein, Omar, Zhang, Ning, Zhuang, Weihua, and Y. and, “Software deﬁned space-air-ground integrated vehicular networks: Challenges and solutions,” IEEE Communications Magazine Articles News & Events of Interest to Communications Engineers, 2017.
+[8] L. Konstantinos, G. Alexander, S. Ray, S. Detlef, W. Simon, P . Geor- gia, E. Barry, W. Ning, V . Oriol, and T. J. a. Boris, “Use cases and scenarios of 5g integrated satellite-terrestrial networks for enhanced mobile broadband: The sat5g approach,” International Journal of Satellite Communications and Networking, 2017.
+Sun, and K. Ren, “Toward efﬁcient multi-keyword fuzzy search over encrypted outsourced data with accuracy improvement,” IEEE Transactions on Information Forensics and Security, vol.
+[15] H. Dai, Y. Ji, L. Liu, G. Yang, and X. Yi, “A privacy-preserving multi-keyword ranked search over encrypted data in hybrid clouds,” in International Conference on Artiﬁcial Intelligence and Security, 2019.
+Sun, and Q. Wang, “A secure and dynamic multi-keyword ranked search scheme over encrypted cloud data,” IEEE Transactions on Parallel and Distributed Systems, vol.
+PP , no.
+De Vel, Q. L. Han, J. Zhang, and Y. Xiang, “Detecting and preventing cyber insider threats: A survey,” IEEE Communications Surveys & Tutorials, pp.
+
+Abstractive Summary (Page 14):
+2327-4662 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/JIOT.2021.3062626, IEEE Internet of
+Things Journal
+14
+[30] G. Lin, S. Wen, Q. L. Han, J. Zhang, and Y. Xiang, “Software
+vulnerability detection using deep neural networks: A survey,”
+Proceedings of the IEEE, vol. PP , no. 99, pp. 1–24, 2020. [31] M. Wang, T. Zhu, T. Zhang, J. Zhang, S. Yu, and W. Zhou, “Security
+and privacy in 6g networks: New areas and new challenges,”
+Digital Communications and Networks, vol. 6, no.
+
+Extractive Summary (Page 14):
+PP , no.
+[31] M. Wang, T. Zhu, T. Zhang, J. Zhang, S. Yu, and W. Zhou, “Security and privacy in 6g networks: New areas and new challenges,” Digital Communications and Networks, vol.
+and Ph.D. degrees from Xidian University, P . R. China, in 2002, 2005 and 2007, respectively, in Telecommunication Engineering, Cryptography and Telecommunication and Information Sys- tem.
+degrees from Northeastern University, P . R. China, in 2009 and 2011, respectively, in Communication Engineering and Computer Applied Technology.
+He received his Ph.D. degree from University of Waterloo, Canada, in 2016, in Electrical and Computer Engineering.
+degree from Nankai University, China, in 2005, and the Ph.D. degree from Peking University, China, in 2010, both in Mathematics.
+In 1990, he received his B. S. degree in radio electronics from Fudan University.
+In 1993, and 1998, he received his M. S. degree and Ph.
+
+
+Summary for paper3.pdf:
+Abstractive Summary (Page 1):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 1
+Active Learning for Knowledge Graph Schema
+Expansion
+Seungmin Seo, Byungkook Oh, Eunju Jo, Sanghak Lee, Dongho Lee,
+Kyong-Ho Lee, Donghoon Shin, and Y eonsoo Lee
+Abstract—Both entity typing and relation extraction from text corpora are widely used to identify the semantic types of an entity and a
+relation in a knowledge graph (KG). Most existing approaches rely on a pre-deﬁned set of entity types and relation types in a KG. They
+thus cannot map entity mentions (relation mentions) to unseen entity types (relation types). To fundamentally overcome the limitations,
+we should add new semantic types of entities and relations to a KG schema. However, schema expansion traditionally requires manual
+conceptualization through a user’s observation on the text corpus while assuming the existence of suitable target KG schemas. In this
+work, we propose an Active learning framework for Knowledge graph Schema Expansion (AKSE), which can generate a new semantic
+type for KG schemas, without depending on a set of target schemas and human users’ observation.
+
+Extractive Summary (Page 1):
+Active Learning for Knowledge Graph Schema Expansion Seungmin Seo, Byungkook Oh, Eunju Jo, Sanghak Lee, Dongho Lee, Kyong-Ho Lee, Donghoon Shin, and Y eonsoo Lee Abstract—Both entity typing and relation extraction from text corpora are widely used to identify the semantic types of an entity and a relation in a knowledge graph (KG).
+In this work, we propose an Active learning framework for Knowledge graph Schema Expansion (AKSE), which can generate a new semantic type for KG schemas, without depending on a set of target schemas and human users’ observation.
+KGs are organized with a set of facts (i.e., triples), which consist of the entities connected by a relation, and a set of semantic types in a hierarchical schema deﬁning the meaning of instances [2].
+Extracting entities and relations from text is the task of assigning types to entity mentions and ﬁnding a relation type between two entity mentions, which can be considered as the label classiﬁcation problem of KGs.
+Moreover, since existing approaches rely on a KG schema with a ﬁxed set of types, they fail to assign the unseen types detected in corpora to entities and relations (see Figure 1).
+As shown in Figure 2, given a text corpus and an initial KG schema, our framework ﬁrst predicts the semantic types of detected entities and relationships via the proposed convolutional neural model employing KG schema hierarchy attention.
+1) To estimate the performance of schema expansion, we construct a seed KG schema and a target KG schema derived from the Freebase1type system.
+2) To verify the efﬁcacy of the annotation process in the proposed framework, we compare the proposed neural model with state-of-the-art entity typing and relation extrac- tion methods.
+
+Abstractive Summary (Page 2):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 2
+ID S entence
+S1 Donald Trump became the 45thpre sident of USA
+S2Detroit pitcher Hal Newhouser was named the American League 's Most Valuable Player for the second 
+consecutive season
+… …T
+ext Corpus
+No. ID Entity 1 Entity Type 1 Entity 2 Entity Type2 Relation Type
+1
+S1 Donald Trump Person/Politician USA Location/Country is_president_of
+2
+S2 Hal Newhouser Person/Athlete Detroit Location/City country_of_birth
+3 S2 American League Organization/ Sports _league MVP Object /Award has_award
+4 S2 Hal Newhouser Person/Athlete MVP Object /Award be_awarded
+Entity type hierarchy
+Rel
+ation type setcountry_of_birth
+i
+s_president_of
+has_awardbe
+_awardedExisting 
+Methods
+Our
+Met
+hods
+add new types 
+to 
+KG SchemaEntity Typing and Relation Extraction
+dd
+Fig. 1. Existing methods cannot assign unseen types (Sports league, Award ) to entities ( AmericanLeague, MVP ), nor extract relation types (has
+award, be awarded ), if there are no such types in the KG schema. Our proposed method overcomes these limitations via an active learning. 1.
+
+Extractive Summary (Page 2):
+ID Entity 1 Entity Type 1 Entity 2 Entity Type2 Relation Type 1 S1 Donald Trump Person/Politician USA Location/Country is_president_of 2 S2 Hal Newhouser Person/Athlete Detroit Location/City country_of_birth 3 S2 American League Organization/ Sports _league MVP Object /Award has_award 4 S2 Hal Newhouser Person/Athlete MVP Object /Award be_awarded Entity type hierarchy Rel ation type setcountry_of_birth i s_president_of has_awardbe _awardedExisting Methods Our Met hods add new types to KG SchemaEntity Typing and Relation Extraction dd Fig.
+Existing methods cannot assign unseen types (Sports league, Award ) to entities ( AmericanLeague, MVP ), nor extract relation types (has award, be awarded ), if there are no such types in the KG schema.
+We introduce a neural model that can carry out both entity typing and relation extraction with the help of the KG schema attention mechanism.
+The proposed method is primarily related to three strains of research: entity typing, relation extraction, and active learning.
+This section summarizes these research directions.2.1 Entity Typing Entity typing is the task of classifying a recognized entity in a text sentence into a semantic type in the entity type hierarchy.
+Ren et al. [9] propose an embedding method AFET, which separately models clean and noisy mentions in a text and incorporates type hierarchy to optimize the model.
+However, none of the methods above assume the incom- pleteness of KG schemas where unseen entity types should be recognized in a text corpus.
+Although Ma et al. [15] proposed a prototype-driven label embedding method working for both seen and unseen types, and Huang et al. [16] presented an unsupervised entity typing method that requires no pre-deﬁned entity types, those methods assume that target type sets already exist in external KG schemas and use that information while learning.
+
+Abstractive Summary (Page 3):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 3
+2.2 Relation Extraction
+Relation extraction is the task of extracting relationships
+between entity mentions. Most prior approaches rely on
+existing entity recognizers or entity typing systems. In this
+work, we focus on the models that integrate entity typing
+and relation extraction. Augenstein et al. [17] introduce a learning method of
+jointly training the named entity classiﬁers and the rela-
+tion extractor. However, it is dependent on existing NLP
+tools like entity recognizer. More recently, Yaghoobzadeh
+et al. [18] introduce multi-instance multi-label learning al-
+gorithms to perform entity typing and relation extraction
+without existing entity typing tools.
+
+Extractive Summary (Page 3):
+The target relation is calculated by combining the ﬁrst-order relation scores by referring to the indirect relationship connected by the context token as the second-order relation.
+However, like the prior works on entity typing, existing relation extraction methods assume that a target KG schema is ready and complete.
+Recently, Shen et al. [27] propose a deep active learning framework for named entity recognition with a CNN-CNN- LSTM architecture where the amount of training data is drastically reduced when deep learning is combined with active learning.
+Kasai et al. [32] introduce a deep learning-based method that targets low-resource settings for entity resolution using a novel combination of transfer learning and active learning.
+The sets of possible entity types (i.e., classes) and relation types (i.e., properties) are organized in a type hierarchy deﬁning the interrelations and restrictions of their usage.
+We deﬁne a KG schema Sas a set of an entity type hierarchyTand a relation type set R. Speciﬁcally, an entity type hierarchyTis deﬁned as a tree, which provides a way to classify and organize entities in a KG.
+3.3 Problem Deﬁnition Given a corpusDwithin a particular domain and a KG with an initial schema S seed, which consists of a target entity type hierarchy T, and a target relation type set R, we aim to (1) extract entity types and relation types from a text corpusD, (2) predict the types that need to be expanded, (3) query an annotator to generate a new semantic type, and (4) add unseen types to a KG schema S seed.
+In this section, we introduce the neural model for pre- dicting semantic types of entities and a relation type be- tween entities.
+
+Abstractive Summary (Page 4):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 4
+Republican  nominee  Do nald  Trump became  the  45thpresident  of  USA in  2017Average Encoder ConvolutionMention 1
+Re
+presentationContext
+Re
+presentationMention 2
+Representation
+Weighted average
+Attention weightMLP with Softmax with LossOu
+tput
+KG schema<
+Donald Trump (Person/Politician) ,  relation: IsPresidentOf ,  USA (Organization/Country) >
+Word vectors
+Fig. 3. An illustration of the proposed neural model predicting semantic types for entities and relations. 4.1 Sentence Encoder
+Given a sentence s, our model ﬁrstly transforms each word
+into a vector representation via a word embedding matrix. These vectors are used to predict the entity types of the
+entity mentions detected and the relation type between
+entities. Speciﬁcally, we also incorporate word position
+embeddings which have been used to effectively reﬂect
+relative distances between the ithwords and their target
+entities [13], [12].
+
+Extractive Summary (Page 4):
+These vectors are used to predict the entity types of the entity mentions detected and the relation type between entities.
+A mention representation m2Rdis computed by averaging the word vectors of entity mention words m1;m2;:::m nm: m=1 nmnmX i=1mi; (1) wherenmis the length of an entity mention.
+We compute the ith element of context vector as: ci=wX j=0(F[j]q[i [w 2] +j]) +b; (2) where F2Rddis the CNN ﬁlter, q2Rdis the word vector of each context word, iindicates 0in w+ 1, b2Rd is the bias, and the context window size wis set to 5.
+The ﬁnal context representation cis formed by a weighted sum of the pooling outputs:c=X aici: (3) ai=f(tWaci); (4) wheref()denotes a non-linear function, tis the vector representation of an entity type generated by the knowledge graph schema encoder, and Wacorresponds to a bilinear parameter matrix.
+Equation 4 shows that we directly utilize the correlation between the schema information of an entity mention in the sentence and the context of the sentence.
+4.2 Knowledge Graph Schema Encoder The entity types in a KG schema have a hierarchical struc- ture, where a lower-level entity type and an upper-level en- tity type form an antisymmetric relationship.
+To reﬂect the structural information of a KG schema when we predict the types of entities and relationships, we encode a KG schema via the ComplEx Bilinear model [36].
+We compute the score used to predict the hierar- chical structure between entity types as follows: s(t1;t2) =Re(ht 1;r;t2)i =Re(X kt1rkt2) =hRe(t 1);Re(r);Re(t 2)i +hRe(t 1);Re(r);Im (t2)i +hIm(t 1);Re(r);Im (t2)i  hIm(t 1);Im (r);Re(t 2)i; (5) Authorized licensed use limited to: Linkoping University Library.
+
+Abstractive Summary (Page 5):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 5
+wheres()is the scoring function, Reis the real part of the
+decomposition generated by an afﬁne transformation, Imis
+the imaginary part, rkis one of the relation types between
+entity types t1andt2, andkis the number of relation types
+that can exist between t1andt2. A hierarchical entity type can also be embedded by
+the isArelation type rIsA, since the scoring function is
+antisymmetric as noted in [13]. In particular, we only encode
+the knowledge graph schema (i.e. T-box triples), not the
+complete knowledge graph (i.e. T-box and A-box triples). For example, we only encode the triple hPolitician, isPresi-
+dentOf, Countryi, not the triple hDonald Trump, IsPresidentOf,
+USAi. 4.3 Type Predictor
+We use a two-layer Multi-Layer Perceptron (MLP) to learn
+predict functions P(tje) andP(rjz), which compute the
+probability that an entity ehas an entity type t, and the
+probability that the entity pair zis related with r, respec-
+tively.P(tje) is deﬁned as follows:
+P(tje) =(WT2tanh(WT1X) + bt); (6)
+where X2R2dindicates the concatenation of a mention
+representation and context representations. Here, WT1and
+WT2are MLP parameter matrices, is the softmax classiﬁer,
+andbtis the bias.
+
+Extractive Summary (Page 5):
+wheres()is the scoring function, Reis the real part of the decomposition generated by an afﬁne transformation, Imis the imaginary part, rkis one of the relation types between entity types t1andt2, andkis the number of relation types that can exist between t1andt2.
+4.3 Type Predictor We use a two-layer Multi-Layer Perceptron (MLP) to learn predict functions P(tje) andP(rjz), which compute the probability that an entity ehas an entity type t, and the probability that the entity pair zis related with r, respec- tively.P(tje) is deﬁned as follows: P(tje) =(WT2tanh(WT1X) + bt); (6) where X2R2dindicates the concatenation of a mention representation and context representations.
+P(rjz)is deﬁned as follows: P(rjz) =(WRs(t1;t2) +br); (8) where WRis the parameter matrix, t1andt2are the gold truth entity types ()is the softmax function, and bris the bias.
+iX jxr ijlogyr ij + (1 xr ij) log(1 yr ij)); (9) Lfinal =Lentity +Lrelation; (10) where xr ijindicates the binary vector where the value is 1 if it is a gold type, and yr ijindicates the probability vector of relation type between tiandtj.is the weighting parameter.Algorithm 1 Active Learning with a Granularity Score Input: annotated training corpus Dl, seed entity type hierarchy T, entity typing and relation extraction model L Output: expanded entity type hierarchy Texpanded , updated training corpusDl updated 1:train a neural model Lwith training corpus Dl, set= 0 2:while<threshold do 3: compute the granularity score for each entity type appeared inDl 4: selectt2T with lowest granularity score  5: select a mini-batch Bof annotated sentences with tfrom Dl 6:Du sentence including mentions annotated with t 7:Dl DlnDu[B 8: retrain model LwithDl 9:T  T[tnew 10:Dl updated Dl,Texpanded T 11:ReturnTexpanded ,Dl updated
+We assume that if the gran- ularity score of an entity type is low, the entity type needs to have a child or a sibling type.
+Based on the granularity scores, we select the type twith the lowest score among the entity types below a given threshold.
+The granularity score of entity type tiis calculated as follows: G(ti) = Pk j=1log(P (tijej)) k; (11) whereejindicates an entity appeared in the given training corpus, and kis the number of all the entities.
+If the expected entropy is higher than the entropy before the expansion, the annotator is then requested to remove or relabel the corresponding type.
+
+Abstractive Summary (Page 6):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 6
+E= X
+iX
+jP(tjjei)log2P(tjjei): (12)
+6 E XPERIMENTS
+In order to evaluate the effectiveness of our framework,
+we used two publicly available corpora and two kinds KG
+schemas derived from Freebase. We compared the perfor-
+mance of the proposed framework on three sets of experi-
+ments with state-of-the-art baselines; 1) schema expansion;
+2) entity typing and relation extraction; and 3) selection
+algorithms in active learning. 6.1 Datasets and Setup
+6.1.1 Corpora
+Both corpora, NYT and Wiki-KBP , include the sentences
+heuristically labeled with the Freebase schema via distant
+supervision [19]. (1) NYT: It consists of 236k annotated
+sentences sampled from New York Times news articles. For the test, 395 sentences were manually annotated by
+[37] [37] with 47 entity types and 24 relation types. (2)
+Wiki-KBP: The training data consists of 24k annotated
+sentences sampled from Wikipedia articles.
+
+Extractive Summary (Page 6):
+We compared the perfor- mance of the proposed framework on three sets of experi- ments with state-of-the-art baselines; 1) schema expansion; 2) entity typing and relation extraction; and 3) selection algorithms in active learning.
+The seed and tar- get schemas for the entity type expansion have the same number of relation types.
+(1) NYT Schema for entity type expansion: The seed schema has 17 entity types, and the target schema has 47 entity types; (2) Wiki-KBP Schema for entity type expansion: The seed schema has 76 entity types, and the target schema has 126 entity types.
+The seed and target schemas for the relation type expansion have the same number of entity types.
+(1) NYT Schema for relation type expansion: The seed schema has 4 relation types, and the target schema has 24 relation types; (2) Wiki-KBP Schema for relation type expansion: The seed schema has 8 relation types, and the target schema has 13 relation types.
+Evaluating the performance of entity typing, we used additional metrics, including Macro-averaged F1 (Ma-F1) and Micro-averaged F1 (Mi-F1), which have been used for evaluating entity typing systems.6.2 Baselines To test the performance of schema expansion, we empiri- cally compared our framework with UCOP , the approach proposed by [4].
+To use the optimal parameters for the baseline methods, we obtained the best values by analyzing the models’ performance on a valida- tion set that contains 10% of the data.
+On the other hand, in the case of UCOP , three users investigated the entities and relations extracted from the neural model and manually select the one that needs to be expanded for 5 minutes (average runtime of our active learning algorithm at each iteration).
+
+Abstractive Summary (Page 7):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 7
+253035404550556065
+0
+5 10 15 20 25 30F1 score
+# of IterationsUCOP AKSE-noAtt AKSE-noND AKSE
+(a) performance comparison of
+entity type expansion on the NYT
+dataset
+10152025303540
+0
+5 10 15 20 25 30 35 40 45 50F1 score
+# of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(b) performance comparison of
+entity type expansion on the
+Wiki-KBP dataset
+10152025303540
+0
+5 10 15 20F1 score
+# of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(c) performance comparison of
+relation type expansion on the
+NYT dataset
+10152025303540455055
+0
+1 2 3 4 5F1 score
+# of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(d) performance comparison of
+relation type expansion on the
+Wiki-KBP dataset
+Fig. 4. Evaluation results on schema expansion
+3035404550556065
+10
+20 30 40 50 60 70 80 90 100 110F1 score
+# of newly annotated sentences per iterationAKSE-noAtt AKSE-noND AKSE
+(a) impact of # of mini-batches on
+the NYT dataset
+15202530354045
+10
+20 30 40 50 60 70 80 90 100 110F1 score
+# of newly annotated sentences per iterationAKSE-noAtt AKSE-noND AKSE(b) impact of # of mini-batches on
+the Wiki-KBP dataset
+Fig. 5. Performance comparison of entity type expansion with a variation
+of mini-batch size
+0.30.40.50.60.70.80.91
+0
+5 10 15 20 25 30Lowest granularity score
+# of iterationsAKSE-noAtt AKSE-noND AKSE
+(a) the lowest granularity score
+per iteration on the NYT dataset
+0.20.30.40.50.60.70.80.91
+0
+5 10 15 20 25 30 35 40 45 50Lowest granularity score
+# of iterationsAKSE-noAtt AKSE-noND AKSE(b) the lowest granularity score
+per iteration on the Wiki-KBP
+dataset
+Fig. 6.
+
+Extractive Summary (Page 7):
+253035404550556065 0 5 10 15 20 25 30F1 score # of IterationsUCOP AKSE-noAtt AKSE-noND AKSE (a) performance comparison of entity type expansion on the NYT dataset 10152025303540 0 5 10 15 20 25 30 35 40 45 50F1 score # of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(b) performance comparison of entity type expansion on the Wiki-KBP dataset 10152025303540 0 5 10 15 20F1 score # of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(c) performance comparison of relation type expansion on the NYT dataset 10152025303540455055 0 1 2 3 4 5F1 score # of IterationsUCOP AKSE-noAtt AKSE-noND AKSE(d) performance comparison of relation type expansion on the Wiki-KBP dataset Fig.
+Evaluation results on schema expansion 3035404550556065 10 20 30 40 50 60 70 80 90 100 110F1 score # of newly annotated sentences per iterationAKSE-noAtt AKSE-noND AKSE (a) impact of # of mini-batches on the NYT dataset 15202530354045 10 20 30 40 50 60 70 80 90 100 110F1 score # of newly annotated sentences per iterationAKSE-noAtt AKSE-noND AKSE(b) impact of # of mini-batches on the Wiki-KBP dataset Fig.
+Performance comparison of entity type expansion with a variation of mini-batch size 0.30.40.50.60.70.80.91 0 5 10 15 20 25 30Lowest granularity score # of iterationsAKSE-noAtt AKSE-noND AKSE (a) the lowest granularity score per iteration on the NYT dataset 0.20.30.40.50.60.70.80.91 0 5 10 15 20 25 30 35 40 45 50Lowest granularity score # of iterationsAKSE-noAtt AKSE-noND AKSE(b) the lowest granularity score per iteration on the Wiki-KBP dataset Fig.
+For instance, when users determine that the entity ’Galleon Group’ of ’organization’ type needs to be expanded, the name of an expanded type is set to the gold label ’organization/company,’ rather than a manually named like ’organization/enterprise.’ At each iteration of the entity type expansion, all the methods added one entity(or relation) type to the schema and got the curated mini-batch and the expanded KG schema to re-train the models.
+Also, as shown in Figure 4(c) and 4(d), we could observe that our models perform much better than the baseline model in relation 364146515661 0 5 10 15 20 25 30F1 score # of IterationsRAND LC MG DASE-noND AKSE(a) performance comparison of active learning methods on the NYT dataset 1924293439 0 5 10 15 20 25 30 35 40 45 50F1 score # of IterationsRAND LC MG DASE-noND AKSE(b) performance comparison of active learning methods on the Wiki-KBP dataset Fig.
+At the end of the iteration of both entity type and relation type expansion, AKSE achieves about 20% higher F1 score than UCOP on NYT dataset, and 15% higher F1 score on Wiki-KBP dataset.
+Especially at the beginning of the iteration of the entity type expansion, UCOP starts about 7% behind the AKSE.
+To check the proposed method’s model training efﬁ- ciency empirically, we ﬁrst initialized the models using 36% and 60% of training data on NYT and Wiki-KBP dataset, respectively, in the entity type expansion setting (16% and Authorized licensed use limited to: Linkoping University Library.
+
+Abstractive Summary (Page 8):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 8
+TABLE 1
+Average model training time per iteration in the simulation setting (in
+seconds). ModelEntity
+type expansion Relation type expansion
+NYT
+Wiki-KBP NYT Wiki-KBP
+UCOP
+11,350 3,420 9,200 3,050
+AKSE 11,700 3,900 9,650 3,540
+60% of training data on each dataset in the relation type
+expansion). We measure the average retraining time at each
+iteration where one entity (or relation) type is added to
+the schema. As reported in Table 1, AKSE shows similar
+training time to the compared method that uses vanilla
+CNN and simple entropy score as an uncertainty measure. We conﬁrmed that the proposed method outperforms the
+compared method in schema expansion with a reasonable
+computational cost. 6.3.2 Human-in-the-loop schema expansion
+We employed ﬁve annotators and let them annotate labels
+independently.
+
+Extractive Summary (Page 8):
+And once again, we could observe that the smaller the number of types included in the schema, the better the schema expansion.
+6.3.3 Impact of batch size We explored the impact of the number of newly annotated sentences in the schema expansion, especially in the entity type expansion.
+We note that if the size of the mini batches exceeds a certain number, there is little performance improvement (about 0.3%) due to the data redundancy.
+A human user only updates the small number of sen- tences in the mini-batch while the corpus has tens of thou- sands of sentences.
+Thus, we found remaining sentences need to be annotated with the new type by estimating the cosine similarity of sentence representations between sentences in the mini-batch and those not in the mini-batch.
+It is important to note that the growing trend of granularity scores justiﬁes that granularity score is a suitable and valid measure for representing the level of completeness of the KG schema.
+The reason is that our active learning algorithm computes a granularity of the type hierarchy with the hypothesis that a coarse type should be organized in a set of speciﬁc types.
+It is worth noting that the more the number of entity types is, the stronger the inﬂuence of incorporating the KG schema attention becomes.
+
+Abstractive Summary (Page 9):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 9
+TABLE 4
+Performance comparison of relation extraction. (%). ModelNYT
+Wiki-KBP
+Pr
+ec Rec F1 Prec Rec F1
+FCM
+35.3 28.0 31.2 27.6 19.7 22.9
+MultiR 29.3 30.5 29.9 25.0 20.7 22.6
+CoType 38.8 47.0 42.5 30.7 37.1 33.6
+ReTrans 41.3 48.8 44.7 28.9 41.2 34.0
+HRL 48.9 48.5 48.6 31.5 39.8 35.1
+AKSE
+(Bilinear) 48.8 48.9 48.8 30.5 41.1 35.0
+AKSE (ComplEx) 49.0 48.9 48.9 31.0 41.5 35.4
+ComplEx embedding method for KG schema encoding, i.e.,
+AKSE (ComplEx) with the variant model using bilinear
+embedding method for KG schema encoding, i.e., AKSE
+(Bilinear). The bilinear model is equivalent to RESCAL [44]
+with a single isArelation type, which does not consider
+the antisymmetric relations of entity type hierarchies. AKSE
+(ComplEx) model outperforms the model using the bilinear
+embedding model, implying that it is crucial in dealing with
+hierarchical schema information for entity typing. Furthermore, we analyzed the common causes of entity
+typing errors, coupled with typical examples:
+Data imbalance: About 80% of the entity mentions
+have the ‘location’ type in training data on NYT
+dataset.
+
+Extractive Summary (Page 9):
+Furthermore, we analyzed the common causes of entity typing errors, coupled with typical examples: Data imbalance: About 80% of the entity mentions have the ‘location’ type in training data on NYT dataset.
+In Wiki-KBP , about 20% of the entity mentions have the ‘location/city’ type, and 67% of the entity mentions are one of the sub-types of ‘person,’ e.g. ‘person/soldier’.
+It means that since the distribution of training data in the Wiki- KBP dataset is well-balanced compared to that in NYT dataset, the performance improvement in Wiki- KBP was much greater than that in NYT dataset.
+. . director of the advanced resi- dency program in photograph conservation at the George Eastman House in Rochester,” our model predicted ’location’ while the gold type is ’organiza- tion.’ Also, in the Wiki-KBP dataset, our model out- put ’/person ’ when the gold type is ’/organization’ for ”Philips will replace outgoing Morrison chief Marc Bolland, who is leaving to take the top job at British clothes-to-food giant Marks and Spencer”.
+Al- though CoType considers various lexical features of the text itself and ReTrans transfers knowledge from other domains to a target domain, the results indicate that the correlation between entity types and relation types in a given KG schema plays an essential role in predicting a relation type between entities.
+We also identiﬁed the common causes of relation extrac- tion errors coupled with typical examples: Confusing sub-types: As shown in Table 4, the results demonstrate that our model’s performance is only slightly better than other methods on the NYT dataset.
+We found that about 72% of relation types are the sub-types of ‘location’ such as ‘loca- tion/location/contains’ or ‘location/country/capital.’ Our model failed to strictly distinguish the sub-types of ‘location’ in the testing phase.
+For instance, in Wiki-KBP dataset, our model outputs ’per:country ofdeath’ while the gold type is ’per:country ofresidence’ in ”Kissel , a native of Adrian, Michigan, whose family has also lived in Minneapolis , has been serving a life sentence since she was convicted in September 2005.” It seems that our model focused on the context of ”life sentence.” Long distance: When the distance between enti- ties becomes longer, our model failed to predict the gold type.
+
+Abstractive Summary (Page 10):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 10
+signed the neural model for entity typing and relation ex-
+traction that leverages type information of KG schemas. We
+also presented an active learning algorithm, which selects
+the types that need expansion, considering the granularity
+of types. Experimental results on two publicly available
+datasets demonstrate the effectiveness and validity of the
+proposed approach. As future work, we will study effective
+re-training schemes for the schema expansion method. We
+plan to address complex relations such as n-ary relations,
+which are expressed in natural languages more frequently. ACKNOWLEDGEMENT
+This work was supported by NCSOFT NLP Center.
+
+Extractive Summary (Page 10):
+[3] M. Mintz, S. Bills, R. Snow, and D. Jurafsky, “Distant supervision for relation extraction without labeled data,” in Proceedings of the Joint Conference of the 47th Annual Meeting of the ACL and the 4th International Joint Conference on Natural Language Processing of the AFNLP: Volume 2-Volume 2.
+[5] D. Yogatama, D. Gillick, and N. Lazic, “Embedding methods for ﬁne grained entity type classiﬁcation,” in Proceedings of the 53rd Annual Meeting of the Association for Computational Linguistics and the 7th International Joint Conference on Natural Language Processing (Volume 2: Short Papers), vol.
+[8] ——, “Neural architectures for ﬁne-grained entity type classiﬁca- tion,” in Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 1, Long Papers, 2017, pp.
+[11] A. Abhishek, A. Anand, and A. Awekar, “Fine-grained entity type classiﬁcation by jointly learning representations and label embeddings,” in Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 1, Long Papers, vol.
+[18] Y. Yaghoobzadeh, H. Adel, and H. Sch ¨utze, “Noise mitigation for neural entity typing and relation extraction,” in Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 1, Long Papers, 2017, pp.
+[23] G. Singh and P . Bhatia, “Relation extraction using explicit context conditioning,” in Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long Papers), 2019, pp.
+Kiss, and S. Mat- soukas, “Active learning for new domains in natural language understanding,” in Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 2 (Industry Papers), 2019, pp.
+[31] A. Chaudhary, J. Xie, Z. Sheikh, G. Neubig, and J. G. Carbonell, “A little annotation does a lot of good: A study in bootstrapping low-resource named entity recognizers,” in Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP), 2019, pp.
+
+Abstractive Summary (Page 11):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 11
+[33] B. Z. Li, G. Stanovsky, and L. Zettlemoyer, “Active learning for
+coreference resolution using discrete annotation,” in Proceedings
+of the 58th Annual Meeting of the Association for Computational
+Linguistics. Association for Computational Linguistics, 2020, pp. 8320–8331. [34] H. Paulheim, “Knowledge graph reﬁnement: A survey of ap-
+proaches and evaluation methods,” Semantic web, vol. 8, no.
+
+Extractive Summary (Page 11):
+Z. Li, G. Stanovsky, and L. Zettlemoyer, “Active learning for coreference resolution using discrete annotation,” in Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics.
+[37] R. Hoffmann, C. Zhang, X. Ling, L. Zettlemoyer, and D. S. Weld, “Knowledge-based weak supervision for information extraction of overlapping relations,” in Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies-Volume 1.
+[40] M. R. Gormley, M. Yu, and M. Dredze, “Improved relation ex- traction with feature-rich compositional embedding models,” in Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing, 2015, pp.
+[42] J. Pennington, R. Socher, and C. Manning, “Glove: Global vectors for word representation,” in Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP), 2014, pp.
+and Ph.D degree in Computer Science from Y onsei University, Seoul, Korea, in 2015, 2017, and 2020.
+She received the M.S degree in the Department of Computer Science at Y onsei University, Seoul, Korea, in 2019.
+He received the M.S degree in the Department of Computer Science at Y onsei University, Seoul, Korea, in 2020.
+and Ph.D. degrees in Computer Science from Y onsei Uni- versity, Seoul, South Korea, in 1995, 1997, and 2001, respectively.
+
+Abstractive Summary (Page 12):
+1041-4347 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE
+Transactions on Knowledge and Data Engineering
+IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING 12
+Yeonsoo Lee is Executive Director at NCSOFT
+Co Ltd. She has been leading the Language AI
+Lab for ﬁve years. She received his B.S., M.S. and Ph.D. degrees in Computer Science from
+Korea University, Seoul, South Korea, in 2000,
+2008, and 2014, respectively. She worked as
+a software engineer at Samsung SDS Co Ltd.
+from 2000 to 2004. Her research interests in-
+clude dialogue system, machine translation, and
+information extraction. Authorized licensed use limited to: Linkoping University Library.
+
+Extractive Summary (Page 12):
+Personal use is permitted, but republication/redistribution requires IEEE permission.
+See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited.
+Citation information: DOI 10.1109/TKDE.2021.3070317, IEEE Transactions on Knowledge and Data Engineering
+Yeonsoo Lee is Executive Director at NCSOFT Co Ltd. She has been leading the Language AI Lab for ﬁve years.
+and Ph.D. degrees in Computer Science from Korea University, Seoul, South Korea, in 2000, 2008, and 2014, respectively.
+She worked as a software engineer at Samsung SDS Co Ltd. from 2000 to 2004.
+Downloaded on June 21,2021 at 12:47:30 UTC from IEEE Xplore.
+Restrictions apply.
+
+
+Summary for paper4.pdf:
+Abstractive Summary (Page 1):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+1
+What Causes Wrong Sentiment Classiﬁcations of
+Game Reviews? Markos Viggiato, Dayi Lin, Abram Hindle, and Cor-Paul Bezemer
+Abstract —Sentiment analysis is a popular technique to identify
+the sentiment of a piece of text. Several different domains
+have been targeted by sentiment analysis research, such as
+Twitter, movie reviews, and mobile app reviews. Although several
+techniques have been proposed, the performance of current
+sentiment analysis techniques is still far from acceptable, mainly
+when applied in domains on which they were not trained. In
+addition, the causes of wrong classiﬁcations are not clear. In
+this paper, we study how sentiment analysis performs on game
+reviews.
+
+Extractive Summary (Page 1):
+We ﬁrst report the results of a large scale empirical study on the performance of widely-used sentiment classiﬁers on game reviews.
+The identiﬁed causes are not trivial to be resolved and we call upon sentiment analysis and game researchers and developers to prioritize a research agenda that investigates how the performance of sentiment analysis of game reviews can be improved, for instance by developing techniques that can automatically deal with speciﬁc game-related issues of reviews (e.g., reviews with advantages and disadvantages).
+This technique consists of identifying the sentiment that is present in a piece of text (words, sentences, or entire documents), which corresponds, in its most basic form, to ﬁnding whether the text has a positive, neutral, or negative sentiment [29].
+Sentiment analysis is a research topic that has gained attention and has presented improvements [15, 49, 56], being developed and applied in several different domains, such as Twitter tweets [3, 5, 8], movie reviews [49], cus- tomer reviews of mobile applications [19, 40], video game Markos Viggiato and Cor-Paul Bezemer are with the Analytics of Software, GAmes And Repository Data (ASGAARD) Lab, University of Alberta, Edmonton, AB, Canada.
+However, the performance of such techniques is still far from acceptable, mainly when off-the-shelf sentiment analysis classiﬁers are applied out of domain, i.e., a classiﬁer is trained in one domain and applied in a different domain without any conﬁguration or adjustment.
+Game reviews contain a more complex text structure and generally discuss several aspects of the game, such as the game’s storyline, graphics, audio and controls [58].
+For instance, players may mention the graphical aspects and the storyline of the game in the same review [50].
+The two pieces of text corresponding to such aspects may have different sentiments, which could confuse the sentiment classiﬁer when making a classiﬁcation of the overall sentiment of the review.
+
+Abstractive Summary (Page 2):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+2
+task for current sentiment classiﬁers: “Very nice programmed
+bugs”. The reviewer makes references to a positive word
+(“nice”), with a stronger intensity due to the use of an adverb
+(“very”), which might lead the classiﬁers to classify this
+instance as positive. However, the overall sentiment of this
+review should be negative as the reviewer is being sarcastic
+(the reviewer is pointing out that the game contains bugs). A deeper investigation of wrong classiﬁcations (failing cases)
+allows us to ﬁnd problematic text patterns for sentiment
+classiﬁers and provide insights for game developers about how
+to improve the performance of sentiment analysis. In this paper, we ﬁrst report the results of a large-scale
+empirical study on the performance of sentiment analysis on
+12 million game reviews. Our goals are (1) to investigate
+how existing sentiment classiﬁers perform on game reviews,
+(2) identify which factors impact the performance and (3)
+quantify the impact of such factors.
+
+Extractive Summary (Page 2):
+The reviewer makes references to a positive word (“nice”), with a stronger intensity due to the use of an adverb (“very”), which might lead the classiﬁers to classify this instance as positive.
+However, the overall sentiment of this review should be negative as the reviewer is being sarcastic (the reviewer is pointing out that the game contains bugs).
+Finally, we performed a series of experiments to quantify the impact of each identiﬁed factor on the performance of sentiment analysis on game reviews.
+Investigating the performance of sentiment analysis on game reviews is the ﬁrst step to understand how current sentiment analysis classiﬁers work on game reviews and whether they are suitable for this task on such data.
+We found several causes which mislead the classiﬁers, such as reviews that make comparisons to games other than the game under review, reviews with negative terminology (e.g., reviews that use the word “kill”) which does not necessarily mean the content has a negative sentiment, and reviews with sarcasm.RQ3: To what extent do the identiﬁed root causes impact the performance of sentiment analysis?
+Quantifying the impact of each identiﬁed root cause to the per- formance of sentiment analysis is important to support game developers with the prioritization of causes to be resolved and a research agenda to address such issues.
+We found that reviews which point out advantages and disadvantages of the game have the highest negative impact on the performance of sentiment analysis, followed by reviews with game compar- isons.
+In this work, we use ‘technique’ to refer to the method adopted for the sentiment classiﬁcation and ‘classiﬁer’ (which can also be understood as ‘tool’ or ‘framework’) to refer to an implementation of a technique (i.e., an actual instance of the technique).
+
+Abstractive Summary (Page 3):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+3
+shows the type of data on which the classiﬁer was originally
+trained. Next, we detail each technique and the corresponding
+classiﬁer(s) we chose to use in our study. 1) Machine Learning-based Techniques: Machine learning-
+based classiﬁers leverage machine learning algorithms, such as
+Support Vector Machines, Na ¨ıve Bayes, and Neural Networks. Examples of classiﬁers that adopt this technique are NLTK [7],
+Stanford CoreNLP [49], and Senti4SD [10]. For our
+study, we selected NLTK andStanford CoreNLP, which
+are open source, free to use and very popular [24, 28]. NLTK is part of a larger NLP package that provides many
+other functions.2Regarding sentiment analysis, NLTK uses a
+bag of words model.
+
+Extractive Summary (Page 3):
+The technique consists of parsing the text to be classiﬁed into a set of sentences and performing a grammatical analysis to capture the compositional semantics of each sentence [27, 29, 49].
+If the resulting score is above zero, the review sentiment is positive; if it is below zero, the review sentiment is negative; otherwise, the review sentiment is neutral.
+In Figure 2, we can see an example of how the sentence “I killed the evil enemy and I won”, which is positive, is wrongly classiﬁed using Stanford CoreNLP (the root node indicates it is a negative sentence).
+As we can observe, each node in the parse tree is assigned a score (from negative toneutral topositive) and the ﬁnal sentiment is obtained via the compositional structure of the tree.
+We can see that different nodes are assigned different sentiments (relative 2https://www.nltk.org/ 3https://nlp.stanford.edu/to the partial sentence composed up to that node) and the sentiment contained in the root is supposed to capture the overall sentiment of the full sentence, which is opposed to only inspecting the sentiment of each word individually and summating the scores.
+The document under analysis must be tokenized into sentences, which are assigned two scores based on the summation of each word’s score: a positive strength score (how positive is the text) that ranges from 1 (not positive) to 5 (very positive), and a negative strength score (how negative is the text) that ranges from -1 (not negative) to -5 (very negative).
+This possibly happens due to the presence of the word “happy”, which is a positive word and misleads the tool to classify the whole sentence as positive.
+In addition, SentiStrength is not able to capture the neutral sentiment in the sentence “The game was nothing special ”, possibly due to the presence of the positive word “special”, which is positive.
+
+Abstractive Summary (Page 4):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+4
+TABLE I: Sentiment analysis techniques, corresponding classiﬁers and default training dataset. Technique Classiﬁer Default training dataset Used by
+Machine learningNLTK*[7] Micro-blog texts [27], [28], [29], [41], [34]
+Stanford CoreNLP [49] Movie reviews [27], [28], [42], [33], [55]
+IBM Alchemy**— [27], [28], [48], [6]
+Senti4SD [10] Stack Overﬂow posts [10], [25]
+Rule-basedSentiStrength [51] MySpace [20] [22], [21], [27], [28]
+SentiStrength-SE [24] JIRA [24], [25]
+EmoText [9] Stack Overﬂow, JIRA [9], [25], [37]
+*Note that we use the machine learning version of NLTK instead of its V ADER version (which uses a rule-based
+approach). **IBM Alchemy is available as a service within IBM Watson at https://www.ibm.com/watson/services/
+tone-analyzer/. True sentiment NLTK classification Sentence
+Negative Positive I am so happy the game keeps freezing
+Positive PositiveWas blown away by some of the developments in the story in this game, 
+not gonna spoil but def a must try
+(a) Example of classiﬁcations made by NLTK. True sentiment SentiStrength classification Sentence Positive strength Negative strength
+Negative Positive I am so happy the game keeps freezing 2 -1
+Neutral Positive The game was nothing special 2 -1
+Positive NegativeWas blown away by some of the developments in the story in this game, 
+not gonna spoil but def a must try1 -2
+(b) Example of classiﬁcations made by SentiStrength. Fig.
+
+Extractive Summary (Page 4):
+True sentiment NLTK classification Sentence Negative Positive I am so happy the game keeps freezing Positive PositiveWas blown away by some of the developments in the story in this game, not gonna spoil but def a must try (a) Example of classiﬁcations made by NLTK.
+True sentiment SentiStrength classification Sentence Positive strength Negative strength Negative Positive I am so happy the game keeps freezing 2 -1 Neutral Positive The game was nothing special 2 -1 Positive NegativeWas blown away by some of the developments in the story in this game, not gonna spoil but def a must try1 -2 (b) Example of classiﬁcations made by SentiStrength.
+The authors performed a manual aspect- based sentiment analysis on all user reviews from two game franchises: the PC-version of three games from the Dragon Age franchise and the three ﬁrst games from the Mass Effect franchise.
+The paper showed that the rating of a user review highlycorrelates with the sentiment of the aspect in question, in the case of a large enough data set.
+Finally, Chiu et al. [13], Raison et al. [43], Wijayanto and Khodra [53], and Yauris and Khodra [57] analyzed the sentiment about speciﬁc aspects of the game (such as graphics and storyline) in reviews.
+The player has a positive feeling about the game’s storyline, but a negative feeling about the game’s graphics.
+In contrast, we evaluate existing sentiment analysis techniques on game reviews, identify the causes for misclassiﬁcations, and quantify the impact of those causes in the performance of the classiﬁers.
+Agarwal et al. [1] built different types of models (a feature based model and a tree kernel based model) to perform two classiﬁcation tasks using Twitter data: a binary task to classify tweets into positive and negative classes; and a 3-way task to classify tweets into positive, negative, and neutral classes.
+
+Abstractive Summary (Page 5):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+5
+then, which consisted of a unigram model. The proposed
+models presented a gain of 4% in performance in comparison
+to the baseline. Saif et al. [46] also used Twitter-related
+data to build sentiment analysis models. The authors added
+semantic features into the three different training datasets: a
+general Stanford Twitter Sentiment (STS) dataset, a dataset on
+the Obama-McCain Debate (OMD), and one on Health Care
+Reform (HCR). The results showed that combining semantic
+features with word unigrams outperforms the baseline (only
+unigrams) for all datasets. On average, the authors increased
+the accuracy by 6.47%.
+
+Extractive Summary (Page 5):
+The authors used 7 apps from the Apple App Store and Google Play Store and their approach presented a precision of 59% and a recall of 51%.
+Among the results, the authors found out that the two developers that were responsible for two major Apache releases had similar personalities, which were different from other developers on the traits of extroversion and openness.
+The results show that, compared to medium and low reputed users, top reputed post’s authors are more extroverted, indicating the presence of social and positive LIWC measures as well as the absence of tentative and negative emotional measures.
+Zagal and Tomuro [60] performed a study on a large body of user- provided game reviews aiming at comparing the characteristics of the reviews across two different cultures.
+The works mentioned above studied the characteristics of game reviews and what are the differences between reviews from different cultures.
+However, we still lack clariﬁcation regarding the performance of existing sentiment classiﬁers on game reviews, which game review text characteristics impact the performance of senti- ment analysis and to what extent they impact it.
+Evaluating Sentiment Analysis Performance Stanford CoreNLPRun classifier on x reviews SentiStrength Sample x reviewsTraining setOut-of-sample bootstrap Process output NLTK Train model Evaluation metricsEvaluation metrics Run classifier on x reviewsProcess outputEvaluation metrics Testing setSample another x reviewsBuilt modelCollecting Game Reviews Extract game reviewsGame reviewsSteam Community Manually Analyzing Wrong Classifications Manual analysis of reviewsRoot causesReviews wrongly classified Quantifying the Impact of the Root Causes Select reviews with and without the root causesEvaluate NLTK on the two review setsCompare the evaluation metrics Fig.
+We removed games that had less than 25 reviews from our initial dataset to reduce a possible bias in our results due to a small number of reviews (e.g., because a large portion of those reviews were posted by friends of the developers).
+
+Abstractive Summary (Page 6):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+6
+We extracted all the reviews for each game from the Steam
+Community and ended up with a total of 12,338,364 reviews
+across all supported natural languages. Steam provides a ﬁlter
+for the language of reviews for a game. We crawled the reviews
+in each language separately using this ﬁlter, to identify the
+language of each review. Most reviews are written in English
+(6,850,130), but there are also reviews in Russian (1,789,979),
+German (525,548), Spanish (469,582), Portuguese (441,145),
+and French (396,057), since the classiﬁers can handle several
+different languages. Besides the review itself, we also collected
+other available data: the recommendation ﬂag (i.e., whether the
+reviewer recommended the game or not), early access status
+(i.e., whether a game is in the early access stage or not), the
+number of playing hours, the author ID, the date when the
+review was posted, helpful count, not helpful count, funny
+count, and the URL of the review. Note that our data consists of Steam game reviews, which is
+different from Metacritic reviews.
+
+Extractive Summary (Page 6):
+Besides the review itself, we also collected other available data: the recommendation ﬂag (i.e., whether the reviewer recommended the game or not), early access status (i.e., whether a game is in the early access stage or not), the number of playing hours, the author ID, the date when the review was posted, helpful count, not helpful count, funny count, and the URL of the review.
+For the purpose of evaluation of the classiﬁers, we consider the game rec- ommendation ﬂag on Steam as the sentiment truth label in our data, that is, we make the assumption that a review that recommends a game has a positive sentiment, while a review that does not recommend a game has a negative sentiment.
+Since it is computa- tionally expensive to train and test it on our entire data, we adopt the out-of-sample bootstrap technique [16] to perform the training and testing, since the use of this technique allows us to avoid possible bias in the training and testing sets as we would have with a simple one-time sampling.
+With the boot- strap process, we are able to obtain the AUC distribution for all the classiﬁers (1,000 AUC values corresponding to the 1,000 bootstrap iterations).
+For the cases in which the classiﬁcation is neutral, we always consider it as a wrong classiﬁcation since our data has only two labels: positive (the reviewer recommends the game) and negative (the reviewer does not recommend the game).
+If the p-value of the applied Wilcoxon test is less than 0.05, then we can refute the null hypothesis, which means that the two distributions are signiﬁcantly different.
+In addition to checking whether the two distributions are different, we provide the magnitude of the difference between the two distributions using Cliff’s delta d[32] effect size.
+We adopt the following thresholds for d[45]: Effect size =8 >>>< >>>:negligible (N);ifjdj  0.147 small (S); if 0.147 <jdj  0.33 medium(M ); if 0.33 <jdj  0.474 large(L); if 0.474 <jdj  1 C. Manually Analyzing Wrong Classiﬁcations To understand why classiﬁers are making wrong classiﬁca- tions and come up with the root causes which might be leading to the poor classiﬁcation performance, we performed a manual analysis on the reviews that were wrongly classiﬁed by each of the three sentiment analysis classiﬁers we use.
+
+Abstractive Summary (Page 7):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+7
+the review text itself that might confuse the classiﬁer rather
+than wrong classiﬁcations due to bias in a classiﬁer. We adopt an inductive approach similar to the open-coding
+technique [14] to manually analyze the reviews. Initially, two
+authors independently read 100 reviews, being 50 wrongly
+classiﬁed as positive and 50 wrongly classiﬁed as negative. They then came up with causes that might have misled the
+classiﬁers. After discussing these causes and reaching an
+agreement on four causes (plus two categories in which the
+misclassiﬁcation was unclear), we selected a representative
+sample with a conﬁdence level of 95% and a conﬁdence
+interval of 5%, which corresponds to 382 reviews. This sample
+was then classiﬁed into the set of agreed upon causes by one
+author so we could obtain the percentage of reviews for each
+cause.
+
+Extractive Summary (Page 7):
+D. Quantifying the Impact of the Root Causes Based on the previous step, in which we extracted possible causes for wrongly classiﬁed reviews, we conducted a series of experiments to evaluate the impact of the identiﬁed causes, separately, on the performance of the sentiment analysis clas- siﬁers.
+For each cause, we selected the set of reviews that are affected by that cause (the affected set), the set of the remaining reviews (the unaffected set), computed the AUC distribution for both sets, and compared the AUC distributions using the Wilcoxon rank-sum test and the Cliff’s delta effect size.
+Figure 4b presents how the performance of the NLTK classiﬁer (by means of the median AUC) varies with the increase in the sample size.
+Using the result of this experiment together with the result of the previous experiment, we decided to use a sample of 100K game reviews to train and test the NLTK classiﬁer.
+Motivation: It is important to verify the performance of widely-used sentiment analysis classiﬁers on game reviews as this is the ﬁrst step to understand whether current sentiment analysis classiﬁers are suitable for classifying the sentiment of such data.
+We also performed an experiment to investigate how the length of the reviews affects the performance of the sentiment classiﬁcation.
+The reviews were split into 51 groups according to their length: reviews with less than 20 characters, reviews with length between 20 and 40 characters (exclusive), reviews with length between 40 and 60 characters (exclusive), and so on up to the last group of reviews with more than 1,000 characters.
+Figure 5 presents the distribution of the AUC metric for the classiﬁers (each value corresponds to an iteration of the bootstrap).
+
+Abstractive Summary (Page 8):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+8
+TABLE II: Evaluation metrics (median) for unbalanced and
+balanced dataset. Classiﬁer Acc. Precision Recall F-measure AUC
+NLTK 0.61 0.60 0.70 0.54 0.70
+NLTK (balanced) 0.67 0.73 0.67 0.65 0.67
+SentiStr. 0.52 0.56 0.63 0.47 0.63
+SentiStr. (balanced) 0.63 0.65 0.63 0.62 0.63
+Stanf. NLP 0.37 0.52 0.53 0.35 0.53
+Stanf.
+
+Extractive Summary (Page 8):
+For SentiStrength, the AUC ranges from 0.60 to 0.61 with a median of 0.60, while forStanford CoreNLP, the AUC ranges from 0.53 to 0.54 with a median of 0.53.
+For all classiﬁer pairs ([NLTK, SentiStrength], [NLTK, Stanford CoreNLP], and [SentiStrength, Stanford CoreNLP]), the Wilcoxon rank-sum test shows that the two distributions are signiﬁcantly different, with a large Cliff’s delta effect size.
+However, for the purpose of a better visualization, the ﬁgure only displays every other range in the xaxis (e.g., the label ‘20 40’ is not shown in the plot, but the corresponding data point for that range is present in the plot).
+Corpora NLTK SentiStrength Stanford CoreNLP Game reviews 0.54 0.47 0.35 Stack Overﬂow posts 0.21 0.34 0.28 Jira issues 0.55 0.62 0.52 Mobile app reviews 0.53 0.64 0.74 the largest changes occurring for reviews with less than 20 characters (AUC of 0.65 for NLTK) and reviews with more than 1,000 characters (AUC of 0.61 for NLTK).
+We found that 75% of the reviews are in the range 20-1000 characters (where NLTK performs best), while 20% of the reviews have less than 20 characters, and 5% of the reviews have more than 1,000 characters.
+After training NLTK on game reviews, it achieves a performance that is similar to the performance on the Jira issues and mobile app reviews corpora.
+We then (2) use the pool of all misclassiﬁed reviews to select a statistically representative sample of 382 reviews for the manual analysis.
+Two authors independently analyzed a sample of 100 reviews (50% wrongly classiﬁed as positive and 50% wrongly classiﬁed as negative) to identify the root causes that may confuse the classiﬁers.
+
+Abstractive Summary (Page 9):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+9
+TABLE IV: Root causes for misclassiﬁcations in sentiment analysis (each review may be assigned to more than one root
+cause). Root cause Deﬁnition Occurrence (%)
+Contrast conjunctionsThe review points out both the advantages and disadvantages of the game,
+frequently using contrast conjunctions30
+Game comparisonThe review contains a comparison with another game or with a previous version
+of the game itself25
+Negative terminologyThe review contains words such as killandevilwhich are not necessarily bad
+for speciﬁc game genres (e.g., action games)23
+Unclear It is not clear what might have caused the wrong classiﬁcation 21
+Sarcasm The review contains sarcastic text 6
+Mismatched recommendationThe user might have entered a wrong recommendation: positive (negative)
+recommendation with a negative (positive) review content6
+X is related to a review Y). After reaching the agreement,
+one author analyzed a statistically representative sample of
+382 reviews (which yields a conﬁdence level of 95% with
+a conﬁdence interval of 5) to compute the frequency of
+occurrence of each cause. Note that each misclassiﬁcation
+may be assigned to more than one root cause (if that is the
+case). The sample of 382 reviews for the manual analysis was
+obtained from the reviews that were misclassiﬁed by all three
+classiﬁers. We focused on reviews that were misclassiﬁed by
+all classiﬁers to better identify characteristics of the review text
+that affect the sentiment analysis classiﬁcation, rather than a
+characteristic of only a single classiﬁer.
+
+Extractive Summary (Page 9):
+Root cause Deﬁnition Occurrence (%) Contrast conjunctionsThe review points out both the advantages and disadvantages of the game, frequently using contrast conjunctions30 Game comparisonThe review contains a comparison with another game or with a previous version of the game itself25 Negative terminologyThe review contains words such as killandevilwhich are not necessarily bad for speciﬁc game genres (e.g., action games)23 Unclear It is not clear what might have caused the wrong classiﬁcation 21 Sarcasm The review contains sarcastic text 6 Mismatched recommendationThe user might have entered a wrong recommendation: positive (negative) recommendation with a negative (positive) review content6 X is related to a review Y).
+Findings: We revealed four types of possible causes for sentiment misclassiﬁcations: use of contrast conjunctions to indicate the advantages and disadvantages of a game in the same review, comparison to other games, reviews with negative terminology, and sarcasm.
+As we can see in the example below, the review contains a positive view (“I love this game...”) and a negative view (“...it keeps ﬂickering please help!”) about the game separated by the conjunction but.
+Example: “I love this game but it keeps ﬂickering, please help!”.Root cause 2: Game comparison Description: The review compares the game with another game or a previous version of the game itself.
+Such compar- isons might make the sentiment classiﬁcation more difﬁcult since positive or negative points might refer to the other game or the game itself in a previous version instead of the current game version under review.
+Symptoms: The review mentions one or more games [A, B...] in a review for another game [G], or mentions a version 1.x of the game [G] in a review for the version 2.x of the same game [G].
+In the example below, the review for the Terraria game compares the reviewed version of the game with a previous version.
+Root cause 3: Negative terminology Description: The review uses (supposedly) negative terminol- ogy (i.e., words with a negative connotation), which might mislead the classiﬁer towards a negative sentiment classiﬁca- tion even though many times the review text has a positive sentiment (as indicated by the recommendation of the game).
+
+Abstractive Summary (Page 10):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+10
+someone with a download cap and 2 other gamers in the
+house, was. not. impressed ”. Root cause 5: Sarcasm
+Description: The review contains sarcastic text. Sarcasm
+occurs when an apparently positive text is actually used to
+convey a negative attitude (or vice-versa) [18]. Prior work has
+shown that sarcasm is difﬁcult to automatically identify [39].
+
+Extractive Summary (Page 10):
+The review in the example below contains sarcastic text as the reviewer makes use of positive words (e.g., great ), when the person actually points out a negative aspect about the game.
+However, the reviewer did not recommend the game, which we assume was a mistake of the reviewer.
+After identifying such reviews, we re-ran the NLTK classiﬁer on both groups: the set of identiﬁed reviews (affected set, which is supposedly harderfor the classiﬁer) and the set of remaining reviews (unaffected set, which is supposedly easier for the classiﬁer since they do not contain the cause for the wrong classiﬁcation).
+Contrast Conjunctions Detection heuristic: We noticed that reviews which point out the advantages and disadvantages of a game usually use contrast conjunctions to transmit the idea of contrast between advantages and disadvantages of the game.
+We deﬁned a list with the contrast conjunctions we observed in our manual analysis and performed a keyword-based search in our dataset to identify reviews that contain one or more conjunctions of the list.
+After the search, we ended up with 10,187,926 reviews in the remaining set (82% of the original dataset) and 2,150,438 reviews in the detected set (identiﬁed by the heuristic).
+As we can observe, the AUC of reviews without contrast is much higher (large Cliff’s delta effect size) than the AUC of reviews with the presence of contrast conjunctions.
+We collected the most played games from the SteamDB platform.6This list was obtained based on the peak number of players who have played the game.
+
+Abstractive Summary (Page 11):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+11
+TABLE V: Contrast conjunctions and corresponding examples. Contrast conjunction Example
+But Nice Matchmaking, butif you are not premium you have no chance... Although, though Although I really enjoy this game, I do think that PTTM still remains the best in the series... Even though, even ifEven though it gets progressively difﬁcult and you won’t get the perfect items each run, you’ll
+ﬁnd yourself coming back for more... Without contrast With contrastAUC
+0 0.64 0.68 0.72 0.76
+Fig. 7: AUC distribution for reviews
+without and with contrast.
+
+Extractive Summary (Page 11):
+After the search, we ended up with 11,753,211 reviews in the remaining set (95% of the original dataset) and 585,153 reviews in the detected set (identiﬁed by the heuristic).
+Figure 8 presents the distributions of the AUC for the sets of reviews without and with comparison.
+In fact, we found a median AUC of almost 0.71 for the group without comparison, while for the group with comparison the median AUC is around 0.65 (8% lower), which indicates that, similarly to the case of reviews with contrast conjunctions, comparisons can also degrade the performance of sentiment analysis.
+Although the review uses (supposedly)negative words, its ﬁnal content might be positive towards the game (i.e., the reviewer might recommend the game even when using negative words).
+For this root cause, instead of adopting the approach as we did for the previous causes, we propose a stratiﬁed training process for the sentiment analysis classiﬁer based on the game genre, which we call per-genre training.
+We used a customized crawler to collect the game genre from Steam for each review in our dataset and grouped reviews by genre so we could train the classiﬁer separately by genre.
+In the case of less popular genres for which we are not able to sample 100K reviews for the training and testing sets (casual, racing, and sports genres), we adopted a 80/20 percentage split to train and test with the bootstrap technique.
+Figure 9 presents the distribution of the AUC for all the genres and also for the baseline, which is the evaluation of NLTK on the entire dataset Authorized licensed use limited to: University of Exeter.
+
+Abstractive Summary (Page 12):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+12
+TABLE VI: Game genres and corresponding number of re-
+views. Genre Number of reviews
+Action 741,569
+Adventure 484,236
+Strategy 395,595
+RPG 372,033
+Casual 128,590
+Racing 43,899
+Sports 33,890
+(Section VI). We can see that, for all the genres except for
+adventure, the median AUC is higher than the median AUC
+for the baseline. In fact, we obtained the following median
+AUC values: 0.70 (baseline), 0.71 (action), 0.69 (adventure),
+0.71 (casual), 0.74 (racing), 0.72 (RPG), 0.72 (sports), and
+0.72 (strategy). The Wilcoxon rank-sum test shows that the
+AUC distribution for each genre is signiﬁcantly different from
+the AUC distribution for the baseline with a large effect size. Reviews that use contrast conjunctions to point out ad-
+vantages and disadvantages of the game have the highest
+negative impact on the performance (11% lower AUC),
+followed by reviews with game comparisons (8% lower
+AUC).
+
+Extractive Summary (Page 12):
+We can see that, for all the genres except for adventure, the median AUC is higher than the median AUC for the baseline.
+Reviews that use contrast conjunctions to point out ad- vantages and disadvantages of the game have the highest negative impact on the performance (11% lower AUC), followed by reviews with game comparisons (8% lower AUC).
+Based on the impact that each root cause has on the sentiment analysis performance, we suggest game developers and re- searchers to develop techniques that can analyze reviews which use contrast conjunctions to point out the advantages and disadvantages of the game under review as this might confuse the classiﬁer.
+Secondly, we suggest to develop techniques that can deal with reviews which make comparison to games other than the game under review or to previous versions of the game itself.
+For instance, negative words (e.g., evil) are used for different purposes in reviews of different genres, such as casual (where the reviewer probably uses it with a negative connotation) and ﬁrst-person shooter (where the reviewer does not intentionally have a negative connotation).
+Reviews that point out advantages and disadvantages of a game (through the use of contrast conjunctions) have a high negative impact on the performance (reducing the median AUC by 11%), followed by reviews that contain comparisons to games other then the game under review (reducing the median AUC by 8%).
+Our study is the ﬁrst important step towards identifying what are the root causes for wrong classiﬁcations in sentiment analysis on game reviews and the impact of each cause.
+Our study calls upon sentiment analysis and game researchers to further investigate how the performance of sentiment analysis on game reviews can be improved, for instance by devel- oping techniques that can automatically deal with speciﬁc game-related issues of reviews (e.g., reviews with contrast conjunctions and reviews with game comparisons).
+
+Abstractive Summary (Page 13):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+13
+[4] B. Bazelli, A. Hindle, and E. Stroulia, “On the person-
+ality traits of StackOverﬂow users,” in 2013 IEEE Int’l
+conference on software maintenance, pp. 460–463. [5] S. K. Bharti, K. S. Babu, and S. K. Jena, “Parsing-based
+sarcasm sentiment recognition in Twitter data,” in Proc. of the 2015 IEEE/ACM Int’l Conference on Advances in
+Social Networks Analysis and Mining, pp. 1373–1380. [6] G. Biondi, V . Franzoni, and V . Poggioni, “A deep learn-
+ing semantic approach to emotion recognition using the
+IBM Watson bluemix alchemy language,” in Int’l Con-
+ference on Computational Science and Its Applications.
+
+Extractive Summary (Page 13):
+Citation information: DOI 10.1109/TG.2021.3072545, IEEE Transactions on Games 13 [4] B. Bazelli, A. Hindle, and E. Stroulia, “On the person- ality traits of StackOverﬂow users,” in 2013 IEEE Int’l conference on software maintenance, pp.
+[8] M. Bouazizi and T. Ohtsuki, “Opinion mining in Twitter: How to make use of sarcasm to enhance sentiment anal- ysis,” in 2015 IEEE/ACM Int’l Conference on Advances in Social Networks Analysis and Mining, pp.
+[9] F. Calefato, F. Lanubile, and N. Novielli, “Emotxt: A toolkit for emotion recognition from text,” in 2017 7th Int’l conference on Affective Computing and Intelligent Interaction Workshops and Demos).
+[21] E. Guzman, O. Aly, and B. Bruegge, “Retrieving di- verse opinions from app reviews,” in 2015 ACM/IEEE Int’l Symposium on Empirical Software Engineering and Measurement (ESEM), pp.
+[24] M. R. Islam and M. F. Zibran, “Leveraging automated sentiment analysis in software engineering,” in 2017 IEEE/ACM 14th Int’l Conference on Mining Software Repositories (MSR), pp.
+[25] ——, “A comparison of software engineering domain speciﬁc sentiment analysis tools,” in 2018 IEEE 25th Int’l Conference on Software Analysis, Evolution and Reengineering (SANER), pp.
+[27] R. Jongeling, S. Datta, and A. Serebrenik, “Choosing your weapons: On sentiment analysis tools for software engineering research,” in 2015 IEEE Int’l Conference on Software Maintenance and Evolution, pp.
+[29] B. Lin, F. Zampetti, G. Bavota, M. Di Penta, M. Lanza, and R. Oliveto, “Sentiment analysis for software engi- neering: How far can we go?” in 2018 IEEE/ACM 40th Int’l Conference on Software Engineering, pp.
+
+Abstractive Summary (Page 14):
+2475-1502 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TG.2021.3072545, IEEE
+Transactions on Games
+14
+natural language processing toolkit,” in Proc. of 52nd
+annual meeting of the association for computational
+linguistics: system demonstrations, 2014, pp. 55–60. [34] P. Mishra, R. Rajnish, and P. Kumar, “Sentiment analysis
+of Twitter data: Case study on digital India,” in 2016
+Int’l Conference on Information Technology. IEEE, pp. 148–153.
+
+Extractive Summary (Page 14):
+of the 1st Int’l workshop on issues of sentiment discovery and opinion mining, 2012, pp.
+[37] N. Novielli, F. Calefato, and F. Lanubile, “A gold stan- dard for emotion annotation in Stack Overﬂow,” in 2018 IEEE/ACM 15th Int’l Conference on Mining Software Repositories (MSR), pp.
+Classifying user reviews for software maintenance and evolution,” in 2015 IEEE Int’l Conference on Software Maintenance and Evolution (ICSME), pp.
+[42] M. M. Rahman, C. K. Roy, and I. Keivanloo, “Rec- ommending insightful comments for source code using crowdsourced knowledge,” in 2015 IEEE 15th Int’l Work- ing Conference on Source Code Analysis and Manipula- tion (SCAM), pp.
+[45] J. Romano, J. D. Kromrey, J. Coraggio, J. Skowronek, and L. Devine, “Exploring methods for evaluating group differences on the nsse and other surveys: Are the t-test and cohen’s d indices the most appropriate choices,” in annual meeting of the Southern Association for Institu- tional Research.
+[48] V . K. Singh, R. Piryani, A. Uddin, and P. Waila, “Senti- ment analysis of movie reviews: A new feature-based heuristic for aspect-level sentiment classiﬁcation,” in 2013 Int’l Mutli-Conference on Automation, Comput- ing, Communication, Control and Compressed Sensing).
+[55] Y . Woldemariam, “Sentiment analysis in a cross-media analysis framework,” in 2016 IEEE International Con- ference on Big Data Analysis (ICBDA), pp.
+[60] J. P. Zagal and N. Tomuro, “Cultural differences in game appreciation: A study of player game reviews.” in FDG, 2013, pp.
+
+
+Summary for paper5.pdf:
+Abstractive Summary (Page 1):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 1
+A Custom Word Embedding Model for Clustering
+of Maintenance Records
+Abhijeet Sandeep Bhardwaj1, Akash Deep2, Dharmaraj Veeramani3and Shiyu Zhou4
+Abstract —Maintenance records of industrial equipment con-
+tain rich descriptive information in free-text format, such as,
+involved parts, failure mechanisms, operating conditions, etc. Our
+objective is to leverage this unstructured textual information to
+identify groups of similar maintenance jobs. We use a natural
+language based approach and propose a novel custom word
+embedding model which utilizes two sources of information 1)
+maintenance records collected from in-ﬁeld operations and 2) in-
+dustrial taxonomy, to effectively identify clusters. The advantages
+of our model include (a) combined use of semantic and taxonomic
+sources of information for clustering, (b) one step/simultaneous
+training, which enables knowledge sharing between the two
+information sources and reduces hyperparameters, and (c) no
+dependency on third-party data.
+
+Extractive Summary (Page 1):
+The advantages of our model include (a) combined use of semantic and taxonomic sources of information for clustering, (b) one step/simultaneous training, which enables knowledge sharing between the two information sources and reduces hyperparameters, and (c) no dependency on third-party data.
+While it is common practice in industry to create and store maintenance records, it is impractical to manually review and extract insights from the large quantity and variety of records that are typically available [7].
+Structured information consists of well-deﬁned data such as time of action, type of action (corrective or preventive), rig number etc., whereas, unstructured informa- 1, 2, 3, 4: Department of Industrial & Systems Engineering, University of Wisconsin-Madsion, Madison, Wisconsin 53706, USAtion is the textual description entered and updated by the technicians such as equipment condition, explanation of the wear or failure, maintenance actions performed, components replaced, etc.
+The aim of this research is to create models to analyze main- tenance records and automatically extract groups or clusters of records that are similar (e.g., in terms of the failure mechanism or the part that was repaired or replaced).
+From a practical perspective, our methodology for analyzing and clustering textual data by combining contextual information as well as industry-speciﬁc taxonomic information, will assist industrial equipment manufacturers and operators to enhance their ability to perform analysis of maintenance activities, failure types, and equipment components that were impacted.
+First, the records in the dataset may comprise different types of maintenance information that are kept by different personnel on the oil rig (such as equipment downtime reports created by machine operators, maintenance reports created by technicians, parts reports created by purchasing and inventory personnel) [9].
+For example, the word ‘stick’ within the maintenance context most likely implies cohesion as opposed to a piece of wood, thus requiring us to consider the context in which the word is being used.
+Fourth, the manner in which the clustering of the maintenance records needs to be done also depends upon the desired context and basis for the grouping (e.g., failure Authorized licensed use limited to: BOURNEMOUTH UNIVERSITY.
+
+Abstractive Summary (Page 2):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 2
+Input Data
+Job 
+IDRig 
+IDDescription of Maintenance Action
+J01 R01Mud pump is currently being run for drilling 
+operations. Unusual vibrations noted. Main 
+Bearing temp 46c.Mechanics to check 
+temperature when running &also check for 
+vibration
+J02 R01Parts Requested from ICS:, Mud Pump 2 Lube 
+Oil Pressure Switch Sticking . Order new 
+switch, Part received and installed
+J03 R02Equipment is out of Service Mud pump # 1out 
+of service to carryout change out of washed -out 
+discharge module
+J04 R03Valve and seat on suction module cyl#3were 
+changed out due to worn conditions and high 
+hours parts.
+
+Extractive Summary (Page 2):
+In general use, word2vec is employed on a single set of data, i.e., the representation generated using word2vec only learns the semantic information presented by the contextual words in the document.
+For example, [14] propose a two-step procedure to identify the relations between words, wherein, in the ﬁrst step they learn embedding, and in the second step, they introduce relation in a supervised way.
+In [17], the authors develop a dynamic weighting neural network and use the hypernym-hyponym (parent-child) pairs available in Wordnet (a lexical database of semantic relations between words) along with contextual words present in a document.
+The word embeddings generated rely on a pre-trained word representation and incorporate taxonomic knowledge as a post processing step [19] This also increases the number of hyper- parameters, like regularization constants, to retain the semantic information.
+The model proposed by [19] and [20] learn the word embeddings using the corpus and taxonomy information where the contextual knowledge is learnt using the GloVe loss function [21].
+Similarly, in [31], each word in the sen- tence is annotated and the objective is to predict not only the contexual words but also the corresponding labels while learning the embeddings.
+More recently, the work proposed by [34] learns embeddings for taxonomy terms using their deﬁnitions in Wiktionary while the work proposed in [35] aims to classify scholarly articles by learning embeddings for each term in knowledge graph using [36].
+Based on the literature review, we note that there is a lack of studies which leverage one-step simultaneous learning of in- formation from both industrial equipment maintenance records and industrial domain taxonomy in a completely unsupervised manner without depending on any additional resource apart from maintenance logs and industrial taxonomy.
+
+Abstractive Summary (Page 3):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 3
+procedure which incorporate the additional information
+as a post-processing step. We employ a one-step learning procedure by employing
+a new learning parameter which weighs the features to
+learn from both bodies of information (contextual and
+taxonomic). This reduces the number of hyper parameters
+required to tune while replicating the model as opposed
+to the two-step procedures [18] and thus avoids the
+dependency on hyper-parameter tuning algorithms. The model does not require the taxonomy terms to be
+contextually co-occurring in a given maintenance log and
+hence can learn from the complete taxonomy rather than
+a subset of terms which co-occur.
+
+Extractive Summary (Page 3):
+This reduces the number of hyper parameters required to tune while replicating the model as opposed to the two-step procedures [18] and thus avoids the dependency on hyper-parameter tuning algorithms.
+The model does not require the taxonomy terms to be contextually co-occurring in a given maintenance log and hence can learn from the complete taxonomy rather than a subset of terms which co-occur.
+Corresponding to each JobID we have the associated system and the description of the maintenance action which was conducted as well as information regarding the portion of the equipment that caused the maintenance action, as well as observations regarding the equipment condition.
+The equipment taxonomy provides the listing of different items that comprise the equipment hierarchy and the relationships between them, namely system, sub-unit, maintainable item and component.
+Once we have established a mathematical representation, the next step is to identify the clusters present in the corpus.
+In the current work, information from a single hierarchy taxonomy, pertaining to the oil and gas industry is incorporated along with the semantic knowledge to learn industry-tailored word embeddings.
+The industry taxonomy provides a grouping of tokens into different classes where tokens in the same class are similar to each other while tokens in different classes are dissimilar to each other.
+Here, if we consider the word “leaking” to be the input word, then the rest of the neighboring words are contextual words for it.
+
+Abstractive Summary (Page 4):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 4
+learn the vector representation for a given input word consti-
+tutes the size of the semantic window represented by jCj. The
+objective of the SG model is to generate a vector representation
+for the given input word which helps to predict the correct
+context word with a high accuracy. In the same example, if
+the size of the semantic window is jCj= 2, then the (input,
+context) word pairs become: (leaking, caused), (leaking, by),
+(leaking, pump), (leaking, valve). The SG model then learns
+such embeddings for “leaking” which can give a high output
+score for the true contextual word.
+
+Extractive Summary (Page 4):
+The objective of the SG model is to generate a vector representation for the given input word which helps to predict the correct context word with a high accuracy.
+The output score is a soft- max score (equation 1) which assigns a probability ranking to all words in the vocabulary for being observed as the context word for a given input word.
+The rows of the weight matrix linking the hidden layer to the output layer gives the output vector representation v0 wjof each word.
+The soft-max score is highest for the true contextual word which are passed while training the neural network as compared to other words in the vocabulary.
+Following the above example, the word ‘pump’ should have the largest soft-max score corresponding to the word ‘leaking’ at the c= 3rdpanel (because ‘pump’ is the 3rdcontext word for ‘leaking’).
+As already described, for the SG model on the output layer, instead of outputting one multinomial distribution, we are outputting jCjmultinomial distributions, one distribution at each panel, where each multinomial dis- tribution gives the probability of observing the true context word at that position.
+The cross-entropy loss maximizes the probability of the observed context words for the given input word (equation 2).
+NCE loss = log( (v0 wjTh) P wn2Wneglog( ( v0 wnTh))(3) wherewjis the output word (positive sample), v0 wjis its output vector, his the hidden layer vector h=vwIT,is the soft-max activation function and wnare the negative sampled words having v0 wnas its vector representation.
+
+Abstractive Summary (Page 5):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 5
+taxonomic information. Let Mbe the set of classes present
+in the taxonomy indexed by f‘0’, ‘1’, ‘2’,, ‘m-1’g. For
+example, ‘mechanical failure’ and ‘material failure’ would
+constitute different classes of the failure mechanism taxonomy. In Fig.
+
+Extractive Summary (Page 5):
+The ﬁrst set contains pairs of tokens belonging to the same class while the second set contains pairs of tokens belonging to the different classes.
+The major motivation is that the tokens of the same class should have similar word embeddings while the tokens belonging to different class should have dissimilar word embeddings.
+The measure of dissimilarity is given by the sum of the cosine distance between different tokens belonging to the same taxonomy class and is shown in equation (4).
+Let mkrepresent a class in set M. LetwT;mkdeﬁne the token (word) from taxonomy class mk(here the subscript Tindicates that the token is also present in the taxonomy).
+8mkinM ml2MX wT;mkr2mk wT;mls2ml(vwT;mkrvwT;mls jjvwT;mkrjjjjvwT;mlsjj) (5) As we propose to learn the semantic and taxonomic informa- tion simultaneously, the tokens (words) of the taxonomic classborrow their embedding vectors from the same weight vector of the original SG model.
+The new loss function is called as the Custom Word Embedding Model loss (CWEM loss) and is given by equation (6) and is deﬁned as a weighted average (weights given by ) of the NCE Loss and the similarity measures given by (WCD and BCS).
+The lower the value of , the higher the taxonomic information in the generated word representation.
+To overcome this shortcoming, the external knowledge from the taxonomy is used in the CWEM to increase the similarity between the words ‘loosened’ and ‘leak’, thus making the two sentences similar to each other.
+
+Abstractive Summary (Page 6):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 6
+Algorithm 1 Initializing and implementing CWEM for a batch
+Input =;N;window size;numskips;lr; wI2V
+.lris the learning rate for the Gradient Descent
+1:Initialize weights for different layers
+First: vwI2WjVjN!N (0;1)
+Hidden: h!vwIT
+Output: v0
+wO2W0
+NjVj!N (0;1)
+2:Create the WCD sets, having words from same taxonomy class
+m02Min same set
+WCD!fwT;mkp;wT;mkq2m08(mk2M)g
+3:Create the BCS sets, having words from different taxonomy
+classesmk;ml2M. BCS!fw T;mkr2mk;wT;mls2ml8(mk;ml2M)g
+4:CalculateNCELoss using equation 3
+5:Calculate WCD using equation 4
+6:Calculate BCS using equation 5
+7:CWEMLoss =NCELoss + (1 )fWCD +BCSg
+8:lrexdecay!lrdecayratefglobal step
+decay stepg
+9:Optimizer!GradientDescent (minimizeCWEMLoss
+usinglrexdecay )
+records shown in Fig. 1 are a representative sample of the
+dataset. We have 11682 maintenance logs (L), and the size of
+the vocabulary (V ) is 12987.
+
+Extractive Summary (Page 6):
+Algorithm 1 Initializing and implementing CWEM for a batch Input = ;N;window size;numskips;lr; wI2V .lris the learning rate for the Gradient Descent 1:Initialize weights for different layers First: vwI2WjVjN!N (0;1) Hidden: h!vwIT Output: v0 wO2W0 NjVj!N (0;1) 2:Create the WCD sets, having words from same taxonomy class m02Min same set WCD!fwT;mkp;wT;mkq2m08(mk2M)g 3:Create the BCS sets, having words from different taxonomy classesmk;ml2M.
+In Setting 1, we use the failure mechanism taxonomy and try to cluster maintenance records that are associated with similar failure mechanisms.
+For any tokens that are not accurately converted, we manually add extra tokens which represent the base form of the words (e.g., for the token ‘Leakage’, we also add ‘Leak’).
+The taxonomy tokens are then combined with each other to form elements of the WCD set which are pairwise combination of tokens from the same class.
+2) Setting 2: On Basis of Mud-Pump Equipment Taxonomy In this Setting, our aim is to identify the cluster of mainte- nance records which describe maintenance activities concerned with same sub-units (or constituents components) present in the mud-pump taxonomy.
+As the current model incorporates information from a single hierarchy taxonomy, we collapse the multi-hierarchy taxonomy of mud-pump to a single hierarchy by collapsing the maintainable items and parts of each sub-unit into a set which we term as sub-parts.
+The processing step 7a for the taxonomy has an additional step as there are many sub-parts which have multiple words in them and are thus converted appropriately into n-grams before training the model.
+Sets of tokens required to develop the model are then created in the similar fashion as discussed in Section IV-B1 and shown in Fig.
+
+Abstractive Summary (Page 7):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 7
+TABLE III: A sample of equipment taxonomy for mud-pump
+Equipment Unit Sub-UnitMaintainable
+ItemParts
+Mud-Pump Fluid EndManifoldDischarge Manifold
+Suction Manifold
+Piston and Liner Piston
+TABLE IV: Number of terms in equipment taxonomy groups
+Sub-units Drive
+MotorFluid
+EndMotor
+CoolingPower
+EndTool
+Control
+# of tokens 10 22 14 19 10
+chosen to be 10 (C = 10; 5 context/target words to the left
+and right of the input word) and the batch size is chosen to be
+256. We set the hyperparameter numskips = 8 to specify
+the number of words to be randomly sampled from the context
+window while learning embedding. To exponentially decay the
+learning rate of the gradient descent optimization, a decay step
+of 200 and a decay rate of 0.875 is selected. We use three
+competitive models to compare the performance of clustering
+of our method as described below:
+1) Competing Models
+1)CWEM with = 1/SG model: The CWEM with = 1.0
+represents the original skip-gram model in our setting.
+
+Extractive Summary (Page 7):
+TABLE III: A sample of equipment taxonomy for mud-pump Equipment Unit Sub-UnitMaintainable ItemParts Mud-Pump Fluid EndManifoldDischarge Manifold Suction Manifold Piston and Liner Piston TABLE IV: Number of terms in equipment taxonomy groups Sub-units Drive MotorFluid EndMotor CoolingPower EndTool Control # of tokens 10 22 14 19 10 chosen to be 10 (C = 10; 5 context/target words to the left and right of the input word) and the batch size is chosen to be 256.
+We use three competitive models to compare the performance of clustering of our method as described below: 1) Competing Models 1)CWEM with = 1/SG model: The CWEM with = 1.0 represents the original skip-gram model in our setting.
+2)GoogleNews: Google‘s set of global word embed- dings which contain pre-trained word embeddings de- veloped on several Google news article stored in the GoogleNews-vectors-negative300.bin.gz 3)Attract-Repel Model: The Attract-Repel model pro- posed by [18] uses pre-trained word embeddings and incorporates additional information regarding the pairs of words which are either synonyms or antonyms.
+The taxonomic knowledge is incorporated by minimizing the distance between the terms that belong to the same taxonomy branch and also co-occur with each other in the record.
+The sub-parts and sub-units for documents in Setting 2 can be assumed to occur primarily as ‘nouns’ in the documents, and hence we ﬁlter the selected documents to only include ‘noun’ and ‘verb’ before performing the experiment in order to remove noisy words.
+To generate the pairwise distance matrix, one approach would be to just simply average the word embeddings of all words in the maintenance record and calculate the distance between these averaged embeddings.
+However, this will be very naive and would not be able to incorporate the essential information in the maintenance records because of the noise present in the dataset.
+The WMD distance measures the dissimilarity between two text documents as the minimum amount of distance that the embedded words of one document need to “travel” to reach the embedded words of another document.
+
+Abstractive Summary (Page 8):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 8
+0.1
+ 0.0 0.2 0.4 0.6 0.8 1.0
+The silhouette coefficient valuesCluster label
+01234The silhouette plot for the various clusters
+0.0 0.1 0.2 0.3 0.4 0.5
+Feature space for the 1st feature0.00.10.20.30.40.50.6Feature space for the 2nd featureThe visualization of the clustered data
+(a) Silhouettes analysis for CWEM with = 0.65 model
+0.1
+ 0.0 0.2 0.4 0.6 0.8 1.0
+The silhouette coefficient valuesCluster label
+01234The silhouette plot for the various clusters
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7
+Feature space for the 1st feature0.00.10.20.30.40.50.6Feature space for the 2nd featureThe visualization of the clustered data
+(b) Silhouettes analysis for SG (CWEM with = 1.0) model
+0.1
+ 0.0 0.2 0.4 0.6 0.8 1.0
+The silhouette coefficient valuesCluster label
+01234The silhouette plot for the various clusters
+0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8
+Feature space for the 1st feature0.00.10.20.30.40.50.60.7Feature space for the 2nd featureThe visualization of the clustered data
+(c) Silhouettes analysis for Attract-Repel (SG) Model
+Fig. 8: Comparison of silhouettes analysis for CWEM with = 0.65
+model, SG (CWEM with = 1.0) model and Attract-Repel(SG)
+model
+evaluation metrics are generated. D. Evaluation Criteria and Metrics
+To evaluate the models’ performance, we use the Adjusted
+Ranked Index (ARI) and the Silhouttes score (SSc) as the
+metric. The ARI is a similarity measure between two clustering
+schemes which considers all pairs of samples and the count of
+pairs that are assigned in the same or different clusters in the
+predicted and true clustering scheme.
+
+Extractive Summary (Page 8):
+0.1 0.0 0.2 0.4 0.6 0.8 1.0 The silhouette coefficient valuesCluster label 01234The silhouette plot for the various clusters 0.0 0.1 0.2 0.3 0.4 0.5 Feature space for the 1st feature0.00.10.20.30.40.50.6Feature space for the 2nd featureThe visualization of the clustered data (a) Silhouettes analysis for CWEM with = 0.65 model 0.1 0.0 0.2 0.4 0.6 0.8 1.0 The silhouette coefficient valuesCluster label 01234The silhouette plot for the various clusters 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 Feature space for the 1st feature0.00.10.20.30.40.50.6Feature space for the 2nd featureThe visualization of the clustered data (b) Silhouettes analysis for SG (CWEM with = 1.0) model 0.1 0.0 0.2 0.4 0.6 0.8 1.0 The silhouette coefficient valuesCluster label 01234The silhouette plot for the various clusters 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 Feature space for the 1st feature0.00.10.20.30.40.50.60.7Feature space for the 2nd featureThe visualization of the clustered data (c) Silhouettes analysis for Attract-Repel (SG) Model Fig.
+The ARI is a similarity measure between two clustering schemes which considers all pairs of samples and the count of pairs that are assigned in the same or different clusters in the predicted and true clustering scheme.
+The SSc measures the consistency of the clusters formed and indicates how well the element is matched to its own cluster as opposed to the neighboring clusters.
+The range of the SSc is [-1, 1], and the higher the SSc, the better the efﬁciency of the clusters formed.
+The plots on the left panels demonstrate the thickness of the cluster formed and the plots on the right panel indicate the clustered points on a 2-dimensional space.
+The results for both the Settings of all the models are summarized in Table V. It can be observed that for a random sample of 100 documents the ARI and SSc for all CWEM with < 1:0is better than the competitive (Attract-Repel, Dict2Vec, Glove) and baseline (word2vec, Google News) models.
+This distinction can be attributed to the POS ﬁltering carried out on the documents for Setting 2 which results in a higher frequency of taxonomy terms in the documents as compared to the other terms.
+By observing the bootstrapped results, we infer that, for documents having high frequency of non-taxonomy tokens (as in the case for maintenance records of Setting 1 and Setting 2), it is better to incorporate semantic knowledge to a higher extent by keeping 0:5< < 1:0to allow for better clustering.
+
+Abstractive Summary (Page 9):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 9
+for bootstrapping in Fig. 9. It can be seen that the mean of
+bootstrapped ARI for CWEM with = 0:65 is signiﬁcantly
+larger than the mean of the other competitive models. TABLE VI: Results from bootstrapping
+Model Name Mean ARI
+Setting 1Mean ARI
+Setting 2
+CWEM=0.2 0.1263 0.2669
+CWEM=0.35 0.1282 0.3689
+CWEM=0.5 0.1268 0.3299
+CWEM=0.65 0.1513 0.3605
+CWEM=0.8 0.1398 0.3560
+CWEM=1 scaled/SG 0.0436 0.1742
+Attract-Repel (SG) 0.1000 0.2506
+Google News 0.0863 0.1188
+Attract-Repel (Google News) 0.1251 0.1330
+Dict2Vec 0.0882 0.1405
+Attract-Repel (Dict2Vec) 0.1452 0.1509
+Joint Rep using GloVe 0.0986 0.1308
+0.2
+ 0.0 0.2 0.4 0.6 0.8
+Adjusted Rand Index0.02.55.07.510.012.515.017.5FrequencyCWEM alpha = 0.65
+Skip-Gram (CWEM alpha = 1.0)
+Attract-Repel(skipgram)
+Fig.
+
+Extractive Summary (Page 9):
+We use information from two sources (namely semantic information and taxonomic information) to efﬁciently learn the word distribution, and a weighting parameter governs the learned representation.
+There are two key observations in this regard: First, the classiﬁcation of documents depend on the secondary source of information, i.e., the clusters formed will be inﬂuenced by the taxonomy which has been used.
+In practice, for a new dataset, the parameter = 1 would yield clusters by using information present only within the documents, thus providing insights about the groups from a general perspective.
+By gradually decreasing the value of in the presence of an available taxonomy, the model will identify clusters based on the taxonomy.
+In this manner, the way of combining different sources of information to identify groups would yield similarities or differences with respect to the provided taxonomy.
+In industrial domain a similar approach can be used for identifying stratiﬁcation in reliability data using the clusters obtained by CWEM in Setting 1.
+For future research, the current model could be extended to incorporate information about the lexical parent-child relations present in multi-hierarchy taxonomies in a straightforward manner without having the dependency on additional resources/supervision.
+[11] E. Khabiri, W. M. Gifford, B. Vinzamuri, D. Patel, and P. Mazzoleni, “Industry speciﬁc word embedding and its application in log classiﬁ- cation,” in Proceedings of the 28th ACM International Conference on Information and Knowledge Management, 2019, pp.
+
+Abstractive Summary (Page 10):
+1551-3203 (c) 2021 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission. See http://www.ieee.org/publications_standards/publications/rights/index.html for more information.This article has been accepted for publication in a future issue of this journal, but has not been fully edited. Content may change prior to final publication. Citation information: DOI 10.1109/TII.2021.3079521, IEEE
+Transactions on Industrial Informatics
+IEEE TRANSACTIONS ON INDUSTRIAL INFORMATICS, VOL. .., NO. ., MAY 2021 10
+Conference on Artiﬁcial Intelligence, ser. IJCAI’15. AAAI Press, 2015,
+p. 1390–1397. [15] I. Vuli ´c and N. Mrk ˇsi´c, “Specialising word vectors for lexical entail-
+ment,” arXiv preprint arXiv:1710.06371, 2017.
+
+Extractive Summary (Page 10):
+[16] C. Zhang, F. Tao, X. Chen, J. Shen, M. Jiang, B. Sadler, M. Vanni, and J. Han, “TaxoGen: Unsupervised Topic Taxonomy Construction by Adaptive Term Embedding and Clustering,” in Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, ser.
+[17] A. T. Luu, Y . Tay, S. C. Hui, and S. K. Ng, “Learning term embeddings for taxonomic relation identiﬁcation using dynamic weighting neural network,” in Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing, 2016, pp.
+[21] J. Pennington, R. Socher, and C. D. Manning, “Glove: Global vectors for word representation,” in Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP), 2014, pp.
+[30] Y . Ma, J. Zhao, and B. Jin, “A hierarchical ﬁne-tuning approach based on joint embedding of words and parent categories for hierarchical multi- label text classiﬁcation,” in International Conference on Artiﬁcial Neural Networks.
+[33] J. Tissier, C. Gravier, and A. Habrard, “Dict2vec: Learning word embeddings using lexical dictionaries,” in Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing, 2017, pp.
+degree in pro- duction and industrial engineering from the Indian Institute of Technology Roorkee, Roorkee, India, in 2017 and MS in Statistics from University of Wis- consin–Madison, Madison, WI, USA in 2021.
+His research focuses on emerging frontiers of digital business, Internet of Things technologies and applications, smart and connected systems, and supply chain management.
+degrees in mechanical engineering from the University of Science and Technology of China, Hefei, China, in 1993 and 1996, respectively, and the master’s degree in industrial engineering and the Ph.D. degree in mechanical engineering from the University of Michigan, Ann Arbor, MI, USA, both in 2000.
+
+
